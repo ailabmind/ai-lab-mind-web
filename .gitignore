@@ -1,0 +1,28 @@
+
+# Archivos del sistema operativo
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+__MACOSX/
+
+# Archivos temporales y de respaldo
+*.log
+*.tmp
+*.bak
+*.zip
+*.tar.gz
+*.csv
+*.swp
+*.swo
+
+# Configuraciones de editores
+.vscode/
+.idea/
+
+# Node (si se llegara a usar)
+node_modules/
+
+# Archivos generados por flujo
+assets/posts/FINAL_*.html
+assets/posts/CORREGIDO_*.html
