@@ -1,0 +1,16 @@
+{
+  "es": {
+    "viewAll": "Ver todos los artículos",
+    "filterBy": "Filtrar por categoría",
+    "readMore": "Leer artículo completo",
+    "latestArticles": "Últimos artículos por categoría",
+    "viewLess": "Ver menos"
+  },
+  "en": {
+    "viewAll": "View all posts",
+    "filterBy": "Filter by category",
+    "readMore": "Read full article",
+    "latestArticles": "Latest articles by category",
+    "viewLess": "Show less"
+  }
+}

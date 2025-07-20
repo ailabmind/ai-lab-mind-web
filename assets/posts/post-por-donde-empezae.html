@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>¿Por dónde empiezo si quiero usar inteligencia artificial en mi negocio? | AI Lab Mind</title>
+    <!-- TailwindCSS (para estilos básicos si el modal no hereda todo) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Nuevas fuentes: Poppins (para títulos) y Lora (para texto del blog) -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        /* Universal box-sizing para un layout consistente */
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Lora', serif; /* Fuente principal para el texto del cuerpo */
+            color: #e0e0e0;
+            overflow-x: hidden; /* Evita el desplazamiento horizontal */
+            min-height: 100vh; /* Asegura que html y body ocupen al menos el 100% de la altura del viewport */
+            display: flex; /* Hace que el body sea un contenedor flex */
+            flex-direction: column; /* Apila los hijos del body verticalmente */
+        }
+        /* Fondo animado */
+        #animated-background-container {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #5856EC 0%, #5AC8FA 100%);
+            z-index: -2;
+        }
+        #backgroundCanvas {
+            position: absolute; inset: 0; opacity: 0.5;
+        }
+        /* Encabezado fijo */
+        header {
+            height: auto;
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+
+        /* Estilos adicionales para la navegación dentro del encabezado */
+        nav a {
+            transition: color .2s, background .2s;
+            border-radius: .25rem;
+        }
+
+        nav a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        @media (min-width: 768px) {
+            nav {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        /* Contenedor principal del contenido */
+        main {
+            flex-grow: 1; /* Hace que main crezca para llenar el espacio vertical disponible */
+            display: block; /* Mantiene main como un contenedor de bloque normal */
+            overflow-y: auto; /* Agrega barra de desplazamiento a main si el contenido se desborda */
+            -webkit-overflow-scrolling: touch; /* Para un desplazamiento más suave en iOS */
+            width: 100%; /* Asegura que main ocupe todo el ancho */
+            padding-top: 5rem; /* Espacio para el encabezado fijo */
+            padding-bottom: 2rem; /* Espacio antes del pie de página */
+        }
+
+        /* Secciones */
+        .page {
+            display: none; /* Oculto por defecto */
+            width: 100%; /* Asegura que las secciones ocupen todo el ancho */
+            min-height: calc(100vh - 4.5rem); /* Asegura una altura mínima para el contenido, considerando el encabezado */
+        }
+        .page.active {
+            display: block; /* Se muestra como bloque cuando está activo */
+        }
+
+        /* Contenedores de contenido de idioma */
+        .lang-content {
+            display: none; /* Oculto por defecto */
+            width: 100%; /* Asegura que el contenido de idioma ocupe todo el ancho */
+        }
+        .lang-content.active {
+            display: block; /* Se muestra como bloque cuando está activo */
+        }
+
+
+        /* Botones */
+        .btn-primary {
+            background-color: #5856EC; color: #fff;
+            padding: .75rem 1.5rem; border-radius: .375rem;
+            font-weight: 500; transition: background-color .2s, transform .2s;
+        }
+        .btn-primary:hover { background-color: #463BBC; transform: translateY(-2px); }
+        .btn-outline {
+            background: transparent; color: #fff;
+            padding: .75rem 1.5rem; border: 2px solid #fff; border-radius: .375rem;
+            font-weight: 500; transition: box-shadow .2s;
+        }
+        .glow-cyan {
+            box-shadow:
+                0 0 8px rgba(0,220,255,0.8),
+                0 0 16px rgba(0,220,255,0.6),
+                0 0 24px rgba(0,220,255,0.4);
+        }
+        .glow-cyan:hover {
+            box-shadow:
+                0 0 12px rgba(0,220,255,1),
+                0 0 24px rgba(0,220,255,0.8),
+                0 0 32px rgba(0,220,255,0.6);
+        }
+        .blue-outline {
+            text-shadow:
+                -1px -1px 0 #00D,
+                1px -1px 0 #00D,
+                -1px  1px 0 #00D,
+                1px  1px 0 #00D;
+        }
+        /* Pie de página */
+        footer {
+            background: #111; color: #aaa;
+            padding: 2rem 1rem; font-size: .85rem;
+            margin-top: auto; /* Empuja el pie de página hacia abajo si el contenido principal no llena todo el espacio */
+        }
+        footer a { color: #aaa; transition: color .2s; }
+        footer a:hover { color: #fff; }
+
+
+        /* Estilos de agente */
+        .agent-card {
+            background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Borde sutil */
+            border-radius: 0.75rem; /* rounded-lg */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra suave */
+            backdrop-filter: blur(5px); /* Efecto de desenfoque */
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Contenedor de imagen de agente para efecto de brillo */
+        .agent-image-upload-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            display: inline-block;
+            width: 16rem;
+            height: 16rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .agent-image-upload-container::before {
+            content: '';
+            position: absolute;
+            background-color: rgba(0,255,255,0.8);
+            box-shadow: 0 0 10px rgba(0,255,255,0.8), 0 0 20px rgba(0,255,255,0.6);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* Animación inicial al cargar */
+        .agent-image-upload-container.initial-shine::before {
+            opacity: 1;
+            animation: borderBeam 2s ease-out forwards;
+        }
+
+        /* Animación continua al pasar el ratón */
+        .agent-image-upload-container:hover::before {
+            opacity: 1;
+            animation: borderBeam 2s linear infinite;
+        }
+
+        /* Keyframes para la animación del haz del borde */
+        @keyframes borderBeam {
+            0% { top: 0; left: 0; width: 0; height: 2px; }
+            25% { top: 0; left: 0; width: 100%; height: 2px; }
+            25.01% { top: 0; left: 100%; width: 2px; height: 0; }
+            50% { top: 0; left: 100%; width: 2px; height: 100%; }
+            50.01% { top: 100%; left: 100%; width: 0; height: 2px; }
+            75% { top: 100%; left: 0; width: 100%; height: 2px; }
+            75.01% { top: 100%; left: 0; width: 2px; height: 0; }
+            99.99% { top: 0; left: 0; width: 2px; height: 100%; }
+            100% { top: 0; left: 0; width: 0; height: 2px; opacity: 0; }
+        }
+
+        /* Estilos de blog/artículo */
+        .blog-article {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .blog-article:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Estilo específico para el fondo de la sección de soluciones para que sea semi-transparente */
+        #solutions {
+            background: linear-gradient(135deg, rgba(88, 86, 236, 0.25), rgba(90, 200, 250, 0.25)); /* Degradado semi-transparente */
+        }
+
+        /* Cuadro de mensaje para errores de audio */
+        #audio-message-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(220, 38, 38, 0.9); /* Rojo-500 con opacidad */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none; /* Oculto por defecto */
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Cuadro de mensaje para retroalimentación del formulario */
+        #form-message-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(16, 185, 129, 0.9); /* Verde-500 con opacidad */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none; /* Oculto por defecto */
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Estilos del banner de consentimiento de cookies */
+        #cookie-consent-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.9); /* Fondo más oscuro */
+            color: white;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 1000;
+            transform: translateY(100%); /* Comienza oculto debajo de la pantalla */
+            transition: transform 0.5s ease-out; /* Animación de deslizamiento suave */
+        }
+
+        #cookie-consent-banner.show {
+            transform: translateY(0); /* Se desliza para mostrar */
+        }
+
+        #cookie-consent-banner p {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            max-width: 600px;
+        }
+
+        #cookie-consent-banner a {
+            color: #5AC8FA; /* Azul claro para enlaces */
+            text-decoration: underline;
+        }
+
+        #cookie-consent-banner button {
+            background-color: #5856EC;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        #cookie-consent-banner button:hover {
+            background-color: #463BBC;
+        }
+
+        @media (min-width: 768px) {
+            #cookie-consent-banner {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 1rem 2rem;
+            }
+            #cookie-consent-banner p {
+                margin-bottom: 0;
+                margin-right: 1rem;
+                text-align: left;
+            }
+        }
+
+        /* --- Estilos de Publicación de Blog (Fusionados) --- */
+        /* Estilos para el contenedor de la publicación dentro del modal - Ajustes tipo Vogue */
+        .blog-post-container {
+            padding: 3rem 2rem; /* Más relleno para mayor espacio en blanco alrededor del contenido */
+            background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente para el contenido de la publicación */
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px); /* Efecto de desenfoque */
+            margin: 0 auto; /* Centra el contenedor */
+            max-width: 900px; /* Ancho máximo aumentado para un diseño más amplio y menos denso */
+            margin-top: 2rem; /* Espacio desde el encabezado */
+            margin-bottom: 2rem; /* Espacio antes del pie de página */
+        }
+
+        /* Asegura que el cuerpo de la publicación use Lora y Poppins para los títulos */
+        .blog-post-container h1,
+        .blog-post-container h2,
+        .blog-post-container h3,
+        .blog-post-container h4,
+        .blog-post-container h5,
+        .blog-post-container h6 {
+            font-family: 'Poppins', sans-serif; /* Usa Poppins para los títulos */
+            font-weight: 600;
+            color: #ffffff; /* Títulos blancos */
+        }
+
+        /* Ajustes de espaciado y tamaño para los títulos de las publicaciones */
+        .blog-post-container h2 { /* Título principal de la publicación */
+            font-size: 2rem;
+            line-height: 1.2;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .blog-post-container h3 { /* Subtítulos de primer nivel */
+            font-size: 1.75rem;
+            line-height: 1.3;
+            margin-top: 2.25rem;
+            margin-bottom: 0.8rem;
+        }
+        .blog-post-container h4 { /* Subtítulos de segundo nivel */
+            font-size: 1.5rem;
+            line-height: 1.4;
+            margin-top: 1.75rem;
+            margin-bottom: 0.6rem;
+        }
+        .blog-post-container h5 { /* Tercer nivel de subtítulos */
+            font-size: 1.25rem;
+            line-height: 1.5;
+            margin-top: 1.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .blog-post-container p {
+            margin-bottom: 2.5rem; /* Más espacio entre párrafos para mejorar la legibilidad, similar a la imagen */
+            font-size: 1.1rem; /* Texto del cuerpo ligeramente más grande para una mejor legibilidad */
+            line-height: 2.3; /* Altura de línea para un espaciado similar a la imagen */
+        }
+
+        /* Specific adjustment for the paragraph "Here are 3 tasks..." to ensure adequate spacing */
+        .blog-post-container .content-section p:last-of-type {
+            margin-bottom: 3rem; /* Aumenta el margen inferior del último párrafo antes de un h2 */
+        }
+
+        .blog-post-container ul {
+            list-style-type: disc;
+            margin-left: 2rem; /* Más sangría para las listas */
+            margin-bottom: 2.5rem; /* Consistente con el espaciado de los párrafos */
+            padding-left: 0; /* Asegura que la lista no tenga relleno extra */
+        }
+        /* Espaciado entre elementos de la lista */
+        .blog-post-container ul li {
+            margin-bottom: 1.5rem; /* Aumentado para mayor separación entre elementos de la lista */
+            font-size: 1.1rem; /* Consistente con el tamaño del párrafo */
+            line-height: 2.3; /* Consistente con la altura de línea del párrafo */
+        }
+        .blog-post-container ul li:last-child {
+            margin-bottom: 0; /* Sin margen inferior en el último elemento de la lista */
+        }
+
+
+        .blog-post-container blockquote {
+            border-left: 4px solid #5AC8FA; /* Borde azul claro para citas */
+            padding-left: 1.5rem; /* Más relleno para citas */
+            margin: 2.5rem 0; /* Más espacio alrededor de las citas */
+            font-style: italic;
+            color: #bbbbbb;
+            font-size: 1.1rem;
+            line-height: 2.3; /* Consistente con el espaciado de los párrafos */
+        }
+
+        /* Estilo para la frase "Soy como tú... pero con IA." */
+        .plain-text {
+            color: #ffffff; /* Color de texto blanco sin brillo */
+        }
+        .glowing-part {
+            /* Animación de brillo y color de texto */
+            animation: neon-pulse 0.8s infinite alternate; /* Duración reducida a 0.8s para un efecto más rápido */
+        }
+
+        @keyframes neon-pulse {
+            0% {
+                color: #888888; /* Color de texto más tenue en estado "apagado" */
+                text-shadow:
+                    0 0 5px #00DFFF, /* Brillo más suave en estado "apagado" */
+                    0 0 10px #00DFFF;
+                opacity: 0.7; /* Opacidad reducida para simular "atenuación" */
+            }
+            100% {
+                color: #ffffff; /* Color de texto blanco brillante en estado "encendido" */
+                text-shadow:
+                    0 0 15px #00DFFF, /* Brillo intenso y envolvente en estado "encendido" */
+                    0 0 30px #00DFFF,
+                    0 0 45px #00DFFF,
+                    0 0 60px #00DFFF;
+                opacity: 1; /* Opacidad total para simular "iluminación" */
+            }
+        }
+
+        /* Estilo para la foto del autor */
+        .author-photo-container {
+            width: 80px; /* Tamaño ligeramente mayor */
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink-0;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 3px solid #5AC8FA; /* Borde azul más pronunciado */
+        }
+        .author-photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Estilo para la imagen del artículo */
+        .article-image-container {
+            margin-bottom: 2.5rem; /* Espacio debajo de la imagen */
+            margin-top: 2.5rem; /* Espacio encima de la imagen */
+            display: flex; /* Usa flexbox para centrar la imagen */
+            justify-content: center; /* Centrar horizontalmente */
+            align-items: center; /* Centrar verticalmente */
+            max-height: 600px; /* Limita la altura máxima del contenedor de la imagen */
+            overflow: hidden; /* Oculta cualquier parte desbordante de la imagen */
+            border-radius: 0.5rem; /* Esquinas ligeramente redondeadas */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); /* Sombra sutil */
+        }
+        .article-image-container img {
+            max-width: 100%; /* La imagen ocupa todo el ancho disponible en su contenedor */
+            height: auto; /* Mantiene la relación de aspecto */
+            max-height: 100%; /* Asegura que la imagen no exceda la altura del contenedor */
+            object-fit: contain; /* Ajusta la imagen dentro del contenedor manteniendo la relación de aspecto */
+        }
+
+        /* Nuevo estilo para el texto "Keywords" */
+        .text-neon-pink {
+            color: #E0BBE4; /* Un rosa suave entre rosa y lila */
+        }
+
+        /* Estilo para la insignia de categoría */
+        .category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px; /* Completamente redondeado */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* font-semibold */
+            color: white; /* text-white */
+            margin-left: 0.5rem; /* ml-2 */
+            margin-top: 0.25rem; /* mt-1 */
+            text-transform: capitalize; /* Capitaliza la primera letra de cada palabra */
+        }
+    </style>
+</head>
+<body>
+<!-- Fondo animado -->
+<div id="animated-background-container">
+    <canvas id="backgroundCanvas"></canvas>
+</div>
+<!-- Encabezado -->
+<header class="fixed inset-x-0 top-0 bg-black bg-opacity-70 backdrop-blur-md z-10">
+    <div class="flex items-center justify-between w-full max-w-7xl mx-auto px-6 py-3">
+        <!-- Logo + título -->
+        <div class="flex items-center space-x-3">
+            <!-- Contenedor para la imagen del logo -->
+            <div class="relative w-10 h-10 rounded-full bg-gray-800 flex items-center justify-content-center overflow-hidden cursor-pointer group" id="logo-upload-container">
+                <!-- Ruta de imagen de logo corregida -->
+                <img alt="Logo de AI Lab Mind" class="w-full h-full object-cover" id="current-logo" src="assets/img/logo.png"/>
+                <input type="file" id="logo-upload-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+            </div>
+            <span class="text-xl font-bold text-white" data-en="AI Lab Mind" data-es="AI Lab Mind">AI Lab Mind</span>
+        </div>
+        <!-- Navegación principal -->
+        <nav class="hidden md:flex flex-grow justify-center space-x-10 uppercase text-sm">
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="Home" data-es="Inicio" href="#home" data-es-href="#home" data-en-href="#home">Inicio</a>
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="Our Approach" data-es="Enfoque" href="#focus" data-es-href="#focus" data-en-href="#focus">Enfoque</a>
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="Solutions" data-es="Soluciones" href="#solutions" data-es-href="#solutions" data-en-href="#solutions">Soluciones</a>
+            <!-- El enlace del blog ahora apunta a blog.html -->
+            <a class="px-2 py-1 hover:text-white text-white font-semibold" data-en="Blog" data-es="Blog" href="blog.html" data-es-href="blog.html" data-en-href="blog-en.html">Blog</a>
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="Contact Us" data-es="Contáctanos" href="#contact" data-es-href="#contact" data-en-href="#contact">Contáctanos</a>
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="FAQ" data-es="FAQ" href="#faq" data-es-href="#faq" data-en-href="#faq">FAQ</a>
+        </nav>
+        <!-- Botón de idioma + móvil -->
+        <div class="flex items-center space-x-4">
+            <!-- Se eliminó la clase 'hidden' para que el selector de idioma sea siempre visible -->
+            <button class="md:inline-block bg-blue-600 hover:bg-blue-800 text-white px-3 py-1 rounded" id="lang-toggle">
+                EN
+            </button>
+            <button class="md:hidden text-white text-2xl" id="mobile-menu-button">
+                ☰
+            </button>
+        </div>
+    </div>
+</header>
+<!-- Contenido principal -->
+<main>
+    <!-- Contenido del Artículo del Blog -->
+    <div class="blog-post-container">
+        <!-- Título principal del artículo -->
+        <h2 class="text-2xl md:text-3xl font-bold mb-6 font-['Poppins',sans-serif]">¿Por dónde empiezo si quiero usar inteligencia artificial en mi negocio?</h2>
+
+        <!-- Metadatos del artículo -->
+        <div class="flex items-center gap-8 mb-12">
+            <!-- Contenedor circular para la foto del autor -->
+            <div class="author-photo-container">
+                <img src="assets/img/autor-lilly.png" alt="Lilly Valiente">
+            </div>
+            <div>
+                <p class="text-gray-300 text-base leading-normal">
+                    <strong>Tiempo de lectura:</strong> 6 min <br>
+                    <strong>Categoría:</strong> <span class="text-blue-300">Aplicación</span> <br>
+                    <strong>Fecha de publicación:</strong> 2024-06-02 <br>
+                    <strong>Autor:</strong> Lilly Valiente <br>
+                    Apasionada por usar IA para liberar tiempo, no para complicarte la vida.
+                </p>
+            </div>
+        </div>
+
+        <hr class="border-gray-700 my-10">
+
+        <!-- Contenedor para la imagen principal del artículo -->
+        <div class="article-image-container">
+            <img src="por-donde-empezar.png" alt="[Imagen de una persona pensando en cómo empezar con IA]" class="mx-auto max-h-[600px] rounded-lg shadow-lg object-contain" />
+        </div>
+
+        <!-- Contenido dinámico del artículo -->
+        <section class="prose prose-invert max-w-none prose-p:leading-relaxed prose-h2:mt-8 prose-h2:mb-3 content-section">
+            <p class="text-base font-lora text-white leading-relaxed">¿Por dónde empiezo si quiero usar inteligencia artificial en mi negocio? ¿Te identificas con esta historia?</p>
+            <p class="text-base font-lora text-white leading-relaxed">Tienes una idea brillante, un negocio que amas, pero sientes que te ahogas en el día a día. Las tareas repetitivas te consumen, el tiempo para la estrategia es nulo, y la idea de integrar "inteligencia artificial" suena a ciencia ficción o a una inversión gigantesca que no puedes permitirte.</p>
+            <p class="text-base font-lora text-white leading-relaxed">No estás solo. Muchos emprendedores y dueños de pequeños negocios se sienten así. La IA parece un monstruo complejo, inalcanzable, o algo que solo las grandes corporaciones pueden permitirse.</p>
+            <p class="text-base font-lora text-white leading-relaxed">Pero la verdad es que la IA está aquí para democratizar la productividad, no para complicarla. Y empezar es mucho más sencillo de lo que imaginas.</p>
+
+            <h2 class="text-xl md:text-2xl font-semibold font-poppins text-white mt-8 mb-3">El primer paso: Identifica tu "dolor" más grande</h2>
+            <p class="text-base font-lora text-white leading-relaxed">No intentes automatizar todo de golpe. Empieza por lo que más te duele. ¿Qué tarea te quita más tiempo? ¿Cuál es la que más odias? ¿Dónde sientes que estás dejando dinero sobre la mesa por falta de eficiencia?</p>
+            <ul>
+                <li><strong>Ejemplo 1: Gestión de correos.</strong> ¿Pasas horas respondiendo emails repetitivos? Un asistente de IA puede redactar borradores, clasificar mensajes, o incluso responder preguntas frecuentes de forma automática.</li>
+                <li><strong>Ejemplo 2: Creación de contenido.</strong> ¿Te cuesta generar ideas para tus redes sociales o tu blog? La IA puede ser tu co-creador, ayudándote a brainstorm, escribir textos, o incluso generar imágenes básicas.</li>
+                <li><strong>Ejemplo 3: Atención al cliente.</strong> Un chatbot bien entrenado puede resolver el 80% de las consultas básicas, liberando a tu equipo para problemas más complejos y personalizados.</li>
+            </ul>
+            <p class="text-base font-lora text-white leading-relaxed">Elige solo una de estas áreas. Una. Y enfócate en ella.</p>
+
+            <h2 class="text-xl md:text-2xl font-semibold font-poppins text-white mt-8 mb-3">Herramientas sencillas para empezar</h2>
+            <p class="text-base font-lora text-white leading-relaxed">No necesitas ser un experto en programación. Hoy existen herramientas "no-code" o "low-code" que te permiten implementar soluciones de IA con unos pocos clics.</p>
+            <ul>
+                <li><strong>Para textos y creatividad:</strong> ChatGPT, Gemini, Claude. Son excelentes para generar ideas, escribir borradores, resumir textos, o incluso ayudarte con la redacción de emails de ventas.</li>
+                <li><strong>Para imágenes:</strong> Midjourney, DALL-E, o incluso las funciones de IA integradas en Canva. Te permiten crear imágenes únicas para tus campañas de marketing sin necesidad de un diseñador gráfico.</li>
+                <li><strong>Para automatización de tareas:</strong> Zapier o Make (antes Integromat) pueden conectar tus apps favoritas (Gmail, Slack, CRM) con herramientas de IA para automatizar flujos de trabajo. Por ejemplo, que un nuevo lead en tu CRM active un email de bienvenida redactado por IA.</li>
+            </ul>
+            <p class="text-base font-lora text-white leading-relaxed">La clave es experimentar. Juega con ellas. No tengas miedo de equivocarte.</p>
+
+            <h2 class="text-xl md:text-2xl font-semibold font-poppins text-white mt-8 mb-3">El impacto real en tu negocio (y en tu vida)</h2>
+            <p class="text-base font-lora text-white leading-relaxed">Imagina esto: en lugar de pasar dos horas al día respondiendo emails, pasas 30 minutos. Esa hora y media extra puede ser para desarrollar una nueva estrategia, para llamar a un cliente clave, o simplemente para tomar un café tranquilo.</p>
+            <p class="text-base font-lora text-white leading-relaxed">La IA no viene a reemplazar tu ingenio, tu creatividad o tu toque humano. Viene a amplificarlos. Viene a eliminar el trabajo tedioso para que puedas enfocarte en lo que realmente te apasiona y en lo que te hace único.</p>
+            <blockquote class="border-l-4 border-blue-400 pl-4 italic text-blue-200">“No se trata de ser el más tecnológico, sino el más inteligente.”</blockquote>
+            <p class="text-base font-lora text-white leading-relaxed">Empezar con la IA es darte permiso para ser más libre. Para liderar tu negocio, en lugar de ser un empleado de él. Para vivir una vida con más propósito y menos agotamiento.</p>
+            <p class="text-base font-lora text-white leading-relaxed">¿Estás listo para dar el primer paso?</p>
+        </section>
+
+        <!-- Static centered text, now after dynamic content -->
+        <p class="text-center">No estás aquí para emplearte en tu negocio.<br/>
+        Estás aquí para liderarlo.</p>
+        <p class="text-center">Automatizar no es volverte técnica. Es volverte libre. Empieza con una sola cosa. La IA hará el resto.</p>
+
+        <!-- Palabras clave e Insignia de Categoría -->
+        <p class="text-gray-500 text-sm mt-10">
+            <strong class="text-neon-pink">Palabras clave:</strong> <span class="text-gray-400">automatización IA, empezar con IA, productividad, casos reales</span>
+            <span id="category-badge" class="category-badge" data-category-name="Aplicación">Aplicación</span>
+        </p>
+
+        <hr class="border-gray-700 my-10">
+
+        <!-- Sección del pie de página del artículo -->
+        <div class="text-center mt-8">
+            <h3 class="text-xs font-medium text-white leading-tight tracking-wide mb-4">
+                Suscríbete al boletín y recibe herramientas prácticas,<br/>
+                historias reales y formas sencillas de usar la IA sin complicarte.
+            </h3>
+            <p class="mb-6 text-lg">¿No sabes por dónde empezar? Empieza con nosotros.</p>
+            <a href="https://ailabmind.com/#boletin" class="inline-block bg-blue-600 hover:bg-blue-800 text-white px-8 py-4 rounded-lg font-medium text-lg transition-colors duration-300"
+               data-es="✉️ Quiero recibir el boletín" data-en="✉️ I want to receive the newsletter">
+                ✉️ Quiero recibir el boletín
+            </a>
+            <p class="text-2xl font-bold mt-10">
+                <span class="plain-text">Soy como tú...</span> <span class="glowing-part">pero con IA.</span>
+            </p>
+        </div>
+    </div>
+</main>
+<!-- Cookie consent banner -->
+<div id="cookie-consent-banner">
+    <div class="lang-content" data-lang="es">
+        <p>Utilizamos cookies propias y de terceros para mejorar nuestros servicios y mostrarte publicidad relacionada con tus preferencias. Al continuar navegando, consideramos que aceptas su uso. Para más información, puedes consultar nuestra <a href="cookies.html" target="_blank">Política de Cookies</a>.</p>
+        <button id="accept-cookies-es">Entendido</button>
+    </div>
+    <div class="lang-content" data-lang="en" style="display:none;">
+        <p>We use our own and third-party cookies to improve our services and show you advertising related to your preferences. By continuing to browse, we consider that you accept their use. For more information, you can consult our <a href="cookies-en.html" target="_blank">Cookie Policy</a>.</p>
+        <button id="accept-cookies-en">Got it</button>
+    </div>
+</div>
+
+<!-- Pie de página -->
+<footer>
+    <div class="container mx-auto grid md:grid-cols-4 gap-8 px-4">
+        <div>
+            <h3 class="text-white font-semibold mb-2" data-en="AI Lab Mind" data-es="AI Lab Mind">AI Lab Mind</h3>
+            <p data-en="Email: info@ailabmind.com" data-es="Email: info@ailabmind.com">Email: info@ailabmind.com</p>
+        </div>
+        <div>
+            <h3 class="text-white font-semibold mb-2" data-en="Quick Links" data-es="Enlaces Rápidos">Enlaces Rápidos</h3>
+            <ul class="space-y-2">
+                <li><a data-en="Home" data-es="Inicio" href="#home" data-es-href="#home" data-en-href="#home">Inicio</a></li>
+                <li><a data-en="Our Approach" data-es="Enfoque" href="#focus" data-es-href="#focus" data-en-href="#focus">Enfoque</a></li>
+                <li><a data-en="Solutions" data-es="Soluciones" href="#solutions" data-es-href="#solutions" data-en-href="#solutions">Soluciones</a></li>
+                <!-- El enlace del blog ahora apunta a blog.html -->
+                <li><a data-en="Blog" data-es="Blog" href="blog.html" data-es-href="blog.html" data-en-href="blog-en.html">Blog</a></li>
+                <li><a data-en="Contact Us" data-es="Contáctanos" href="#contact" data-es-href="#contact" data-en-href="#contact">Contáctanos</a></li>
+                <li><a data-en="FAQ" data-es="FAQ" href="#faq" data-es-href="#faq" data-en-href="#faq">FAQ</a></li>
+            </ul>
+        </div>
+        <div>
+            <h3 class="text-white font-semibold mb-2" data-en="Follow Us" data-es="Síguenos">Síguenos</h3>
+            <ul class="space-y-2">
+                <li><a data-en="LinkedIn" data-es="LinkedIn" href="https://linkedin.com/company/105943016" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                <li><a data-en="TikTok" data-es="TikTok" href="https://tiktok.com/@ailabmind" target="_blank" rel="noopener noreferrer">TikTok</a></li>
+                <li><a data-en="Facebook" data-es="Facebook" href="https://facebook.com/ailabmind" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+                <li><a data-en="YouTube" data-es="YouTube" href="https://youtube.com/@AILabMind" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+                <li><a data-en="Instagram" data-es="Instagram" href="https://instagram.com/ailabmind" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+            </ul>
+        </div>
+        <div>
+            <!-- Formulario de boletín (Español) -->
+            <form id="form-newsletter-es" class="space-y-4 text-white text-sm max-w-xs">
+                <label class="block font-semibold text-white mb-1" data-es="Boletín" data-en="Newsletter">Boletín</label>
+
+                <input type="email" name="email" required
+                    data-es-placeholder="Tu correo electrónico" data-en-placeholder="Your email address"
+                    placeholder="Tu correo electrónico"
+                    class="w-full px-4 py-2 rounded-lg bg-gray-800 placeholder-white/60 text-white border-none focus:ring-2 focus:ring-blue-500 transition" />
+
+                <label class="flex items-start gap-2 text-white/90 text-sm leading-tight">
+                    <input type="checkbox" name="consentimiento" required
+                        class="mt-1 form-checkbox text-blue-500 rounded border-gray-600 focus:ring-blue-500" />
+                    <span data-es="He leído y acepto la <a href='privacy.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Política de Privacidad</a>."
+                          data-en="I have read and accept the <a href='privacy-en.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Privacy Policy</a>.">
+                        He leído y acepto la <a href='privacy.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Política de Privacidad</a>.
+                    </span>
+                </label>
+
+                <input type="hidden" name="idioma" value="es">
+                <input type="hidden" name="fecha" id="fecha-newsletter-es">
+
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-2 rounded-lg hover:opacity-90 transition"
+                    data-es="Suscribirse" data-en="Subscribe">
+                    Suscribirse
+                </button>
+
+                <p id="newsletter-confirmacion-es" class="hidden text-green-400 font-medium text-sm text-center mt-2"
+                    data-es="¡Gracias por suscribirte!" data-en="Thanks for subscribing!">¡Gracias por suscribirte!</p>
+            </form>
+
+            <!-- Formulario de boletín (Inglés) -->
+            <form id="form-newsletter-en" class="space-y-4 text-white text-sm max-w-xs" style="display:none;">
+                <label class="block font-semibold text-white mb-1" data-es="Boletín" data-en="Newsletter">Newsletter</label>
+
+                <input type="email" name="email" required
+                    data-es-placeholder="Tu correo electrónico" data-en-placeholder="Your email address"
+                    placeholder="Your email address"
+                    class="w-full px-4 py-2 rounded-lg bg-gray-800 placeholder-white/60 text-white border-none focus:ring-2 focus:ring-blue-500 transition" />
+
+                <label class="flex items-start gap-2 text-white/90 text-sm leading-tight">
+                    <input type="checkbox" name="consentimiento" required
+                        class="mt-1 form-checkbox text-blue-500 rounded border-gray-600 focus:ring-blue-500" />
+                    <span data-es="He leído y acepto la <a href='privacy.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Política de Privacidad</a>."
+                          data-en="I have read and accept the <a href='privacy-en.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Privacy Policy</a>.">
+                        I have read and accept the <a href='privacy-en.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Privacy Policy</a>.
+                    </span>
+                </label>
+
+                <input type="hidden" name="idioma" value="en">
+                <input type="hidden" name="fecha" id="fecha-newsletter-en">
+
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-2 rounded-lg hover:opacity-90 transition"
+                    data-es="Suscribirse" data-en="Subscribe">
+                    Subscribe
+                </button>
+
+                <p id="newsletter-confirmacion-en" class="hidden text-green-400 font-medium text-sm text-center mt-2"
+                    data-es="¡Gracias por suscribirte!" data-en="Thanks for subscribing!">Thanks for subscribing!</p>
+            </form>
+        </div>
+    </div>
+    <div class="text-center text-gray-500 text-sm mt-4" data-en="© 2025 AI Lab Mind. All rights reserved." data-es="© 2025 AI Lab Mind. Todos los derechos reservados.">© 2025 AI Lab Mind. Todos los derechos reservados.</div>
+    <div class="mt-4 text-center text-sm text-white">
+        <!-- Enlaces Legales en Español -->
+        <div class="lang-content" data-lang="es">
+            <a class="mx-2 hover:underline" href="terms.html">Términos</a>
+            <a class="mx-2 hover:underline" href="privacy.html">Privacidad</a>
+            <a class="mx-2 hover:underline" href="cookies.html">Cookies</a>
+            <a class="mx-2 hover:underline" href="legal.html">Aviso Legal</a>
+        </div>
+        <!-- Enlaces Legales en Inglés -->
+        <div class="lang-content" data-lang="en" style="display:none;">
+            <a class="mx-2 hover:underline" href="terms-en.html">Terms</a>
+            <a class="mx-2 hover:underline" href="privacy-en.html">Privacy</a>
+            <a class="mx-2 hover:underline" href="cookies-en.html">Cookies</a>
+            <a class="mx-2 hover:underline" href="legal-en.html">Legal Notice</a>
+        </div>
+    </div>
+</footer>
+<!-- Scripts -->
+<script>
+    // Animación de ondas
+    const canvas = document.getElementById('backgroundCanvas'), ctx = canvas.getContext('2d');
+    let W,H;
+    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    const waves = [
+        { amp:70, freq:0.005, spd:0.0001, color:'rgba(0,220,255,0.7)', lw:3, sc:'rgba(0,220,255,1)' },
+        { amp:80, freq:0.0045, spd:0.00012, color:'rgba(180,0,255,0.7)', lw:3, sc:'rgba(180,0,255,1)' },
+        { amp:65, freq:0.0055, spd:-0.00015, color:'rgba(50,150,255,0.6)', lw:2.8, sc:'rgba(50,150,255,1)' },
+        { amp:75, freq:0.0048, spd:0.00008, color:'rgba(255,100,200,0.7)', lw:3.2, sc:'rgba(255,100,200,1)' },
+        { amp:60, freq:0.006, spd:0.00007, color:'rgba(0,255,180,0.6)', lw:2.5, sc:'rgba(0,255,180,1)' },
+        { amp:85, freq:0.0042, spd:-0.0001, color:'rgba(220,150,255,0.7)', lw:3.5, sc:'rgba(220,150,255,1)' },
+        { amp:72, freq:0.0053, spd:0.00014, color:'rgba(0,100,255,0.6)', lw:2.9, sc:'rgba(0,100,255,1)' },
+        { amp:68, freq:0.0058, spd:0.00009, color:'rgba(255,0,255,0.7)', lw:3.1, sc:'rgba(255,0,255,1)' }
+    ];
+
+    function draw(t){
+        ctx.clearRect(0,0,W,H);
+        waves.forEach(w=>{
+            ctx.beginPath();
+            ctx.strokeStyle = w.color;
+            ctx.lineWidth   = w.lw;
+            ctx.shadowBlur  = w.lw * 4;
+            ctx.shadowColor = w.sc;
+            for(let x=0; x<=W; x+=4){
+                const y = H/2 + Math.sin(x*w.freq + t*w.spd) * w.amp;
+                x===0? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+            }
+            ctx.stroke();
+        });
+        requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+    // Funciones para el manejo de secciones e idiomas
+    let currentLang = localStorage.getItem('currentLang') || 'es'; // Idioma por defecto
+
+    // Función auxiliar para actualizar el contenido de idioma de la sección activa
+    function updateLanguageContentForActiveSection() {
+        // En este caso, como el post está directamente en main, no hay "secciones activas" en el mismo sentido.
+        // Solo necesitamos asegurarnos de que los elementos con `lang-content` en el footer y el banner de cookies
+        // se actualicen correctamente.
+        document.querySelectorAll('.lang-content').forEach(langDiv => {
+            if (langDiv.dataset.lang === currentLang) {
+                langDiv.classList.add('active');
+                langDiv.style.display = 'block';
+            } else {
+                langDiv.classList.remove('active');
+                langDiv.style.display = 'none';
+            }
+        });
+    }
+
+    // showSection function is now largely irrelevant as there are no internal sections to navigate to
+    // other than the blog post itself. Keeping it as a placeholder if future sections are added.
+    function showSection(sectionId) {
+        // This function would typically hide/show different sections.
+        // Since we're displaying a single blog post directly in <main>,
+        // this function's primary purpose for internal sections is now minimal.
+        // It's kept for consistency with the base template's original design.
+        console.log(`[showSection] Attempted to navigate to section: ${sectionId}. Currently displaying blog post.`);
+    }
+
+
+    function applyLang() {
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            // Manejar marcadores de posición para elementos input/textarea
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                const placeholderAttr = currentLang === 'en' ? el.dataset.enPlaceholder : el.dataset.esPlaceholder;
+                if (placeholderAttr) {
+                    el.placeholder = placeholderAttr;
+                } else {
+                    el.placeholder = currentLang === 'en' ? el.dataset.en : el.dataset.es;
+                }
+            }
+            // Manejar innerHTML para etiquetas/spans que contienen enlaces (como el texto de consentimiento)
+            else if (el.closest('label') && (el.dataset.es || el.dataset.en)) { // Verificar si es un span dentro de una etiqueta con atributos data-lang
+                el.innerHTML = currentLang === 'en' ? el.dataset.en : el.dataset.es;
+            }
+            // Manejar textContent para otros elementos
+            else {
+                el.textContent = currentLang === 'en' ? el.dataset.en : el.dataset.es;
+            }
+        });
+
+        document.getElementById('lang-toggle').textContent = currentLang === 'es' ? 'EN' : 'ES';
+
+        // Ocultar/mostrar enlaces del footer y checkboxes GDPR según el idioma
+        document.querySelectorAll('footer .lang-content, #contact .lang-content, #cookie-consent-banner .lang-content').forEach(div => {
+            if (div.dataset.lang === currentLang) {
+                div.style.display = 'block';
+            } else {
+                div.style.display = 'none';
+            }
+        });
+
+        // Actualizar href de los botones y enlaces con data-es-href/data-en-href
+        document.querySelectorAll('[data-es-href][data-en-href]').forEach(link => {
+            link.href = currentLang === 'es' ? link.dataset.esHref : link.dataset.enHref;
+        });
+
+        // After updating all texts, ensure the content of the active section is visible
+        updateLanguageContentForActiveSection();
+        updateCategoryBadgeColor(); // Call to update the category badge color
+    }
+
+    // Function to display a temporary message box for audio (kept for compatibility)
+    function showAudioMessageBox(message, type = 'error', duration = 5000) {
+        const msgBox = document.getElementById('audio-message-box');
+        if (!msgBox) {
+            console.error("Audio message box element not found!");
+            return;
+        }
+        msgBox.textContent = message;
+        msgBox.style.display = 'block';
+        if (type === 'error') {
+            msgBox.style.backgroundColor = 'rgba(220, 38, 38, 0.9)'; // Red
+        } else {
+            msgBox.style.backgroundColor = 'rgba(29, 78, 216, 0.9)'; // Blue for other messages
+        }
+
+        setTimeout(() => {
+            msgBox.style.display = 'none';
+        }, duration);
+    }
+
+    // Function to display a temporary message box for forms
+    function showFormMessageBox(message, type = 'success', duration = 5000) {
+        const msgBox = document.getElementById('form-message-box');
+        if (!msgBox) {
+            console.error("Form message box element not found!");
+            return;
+        }
+        msgBox.textContent = message;
+        if (type === 'success') {
+            msgBox.style.backgroundColor = 'rgba(16, 185, 129, 0.9)'; // Tailwind green-500
+        } else if (type === 'error') {
+            msgBox.style.backgroundColor = 'rgba(220, 38, 38, 0.9)'; // Tailwind red-500
+        }
+        msgBox.style.display = 'block';
+        setTimeout(() => {
+            msgBox.style.display = 'none';
+        }, duration);
+    }
+
+
+    // Global variable to keep track of the currently playing audio
+    let currentPlayingAudio = null;
+
+    // Function to handle menu responsiveness (desktop vs. mobile)
+    function handleMenuResponsiveness() {
+        const navMenu = document.querySelector('header nav');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        // Determine if currently in mobile view based on Tailwind's 'md' breakpoint (768px)
+        const isMobileView = window.innerWidth < 768;
+
+        if (!navMenu || !mobileMenuButton) {
+            console.warn("[handleMenuResponsiveness] Navigation elements not found. Cannot apply responsiveness.");
+            return;
+        }
+
+        if (isMobileView) {
+            // On mobile, ensure the mobile button is visible
+            mobileMenuButton.style.display = 'block';
+
+            // If the nav menu is currently visible (i.e., 'hidden' class is NOT present),
+            // ensure it has the mobile-specific layout classes.
+            if (!navMenu.classList.contains('hidden')) {
+                navMenu.classList.add('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+                // Remove desktop specific flex classes if they were somehow applied
+                navMenu.classList.remove('flex', 'flex-grow', 'justify-center', 'space-x-10');
+            } else {
+                // If it's hidden, ensure it doesn't have mobile layout classes
+                // (they will be added when the mobile menu button is clicked to show it)
+                navMenu.classList.remove('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+            }
+        } else {
+            // On desktop, ensure mobile button is hidden
+            mobileMenuButton.style.display = 'none';
+
+            // Ensure nav is always visible and horizontal on desktop
+            navMenu.classList.remove('hidden', 'flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+            // Add desktop flex classes if they are missing
+            navMenu.classList.add('flex', 'flex-grow', 'justify-center', 'space-x-10');
+        }
+    }
+
+    // Function to set up contact form submission (kept for compatibility)
+    function setupContactForm(formId, lang) {
+        const form = document.getElementById(formId);
+        if (!form) {
+            console.error(`Form with ID ${formId} not found.`);
+            return;
+        }
+
+        const mensajeConfirmacion = document.getElementById(`mensaje-confirmacion-${lang}`);
+        const fechaInput = form.querySelector('[name="fecha"]'); // Select by name, safer
+
+        // Set initial date
+        if (fechaInput) {
+            fechaInput.value = new Date().toLocaleString("es-ES"); // Changed to es-ES
+        }
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Update date just before submission to ensure it's current
+            if (fechaInput) {
+                fechaInput.value = new Date().toLocaleString("es-ES"); // Changed to es-ES
+            }
+
+            const data = {
+                nombre: form.nombre.value,
+                apellido: form.apellido.value,
+                email: form.email.value,
+                mensaje: form.mensaje.value,
+                consentimiento: form.consentimiento.checked ? "si" : "no",
+                idioma: lang, // Use the passed lang parameter
+                fecha: fechaInput ? fechaInput.value : '' // Ensure fecha is included if found
+            };
+
+            try {
+                const response = await fetch("https://n8n.ailabmind.com/webhook/form-contacto", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    form.reset();
+                    if (mensajeConfirmacion) {
+                        mensajeConfirmacion.classList.remove("hidden");
+                        setTimeout(() => mensajeConfirmacion.classList.add("hidden"), 4000);
+                    }
+                    showFormMessageBox(lang === 'es' ? '¡Mensaje enviado con éxito!' : 'Message sent successfully!', 'success');
+                } else {
+                    const errorText = await response.text(); // Get response text for more details
+                    console.error(`Failed to send data. Status: ${response.status}, Response: ${errorText}`);
+                    showFormMessageBox(lang === 'es' ? 'Hubo un error al enviar el formulario.' : 'There was an error sending the form.', 'error');
+                }
+            } catch (err) {
+                console.error(`Network error:`, err);
+                showFormMessageBox(lang === 'es' ? 'Error de conexión.' : 'Connection error.', 'error');
+            }
+        });
+    }
+
+    // Function to set up newsletter form submission
+    function setupNewsletterForm(formId, lang) {
+        const form = document.getElementById(formId);
+        if (!form) {
+            console.error(`Form with ID ${formId} not found.`);
+            return;
+        }
+
+        const mensajeConfirmacion = document.getElementById(`newsletter-confirmacion-${lang}`);
+        const fechaInput = form.querySelector('[name="fecha"]');
+
+        if (fechaInput) {
+            fechaInput.value = new Date().toISOString();
+        }
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            if (fechaInput) {
+                fechaInput.value = new Date().toISOString();
+            }
+
+            const data = {
+                email: form.email.value,
+                consentimiento: form.consentimiento.checked ? "si" : "no",
+                idioma: lang,
+                fecha: fechaInput ? fechaInput.value : ''
+            };
+
+            try {
+                const response = await fetch("https://n8n.ailabmind.com/webhook/form-newsletter", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    form.reset();
+                    if (mensajeConfirmacion) {
+                        mensajeConfirmacion.classList.remove("hidden");
+                        setTimeout(() => mensajeConfirmacion.classList.add("hidden"), 4000);
+                    }
+                    showFormMessageBox(lang === 'es' ? '¡Gracias por suscribirte!' : 'Thanks for subscribing!', 'success');
+                } else {
+                    const errorText = await response.text();
+                    console.error(`Failed to send data. Status: ${response.status}, Response: ${errorText}`);
+                    showFormMessageBox(lang === 'es' ? 'Hubo un error al enviar el formulario.' : 'Error submitting the form.', 'error');
+                }
+            } catch (err) {
+                console.error(`Network error:`, err);
+                showFormMessageBox(lang === 'es' ? 'Error de conexión.' : 'Could not connect to the server.', 'error');
+            }
+        });
+    }
+
+    // Object to map category names to Tailwind CSS background classes
+    const categoryColors = {
+        "Automation": "bg-indigo-500",
+        "AI": "bg-purple-500",
+        "Productivity": "bg-green-500",
+        "Business": "bg-yellow-500",
+        "Efficiency": "bg-teal-500",
+        "Simplify": "bg-pink-500",
+        "Strategy": "bg-blue-500",
+        "Communication": "bg-red-500",
+        "Education": "bg-orange-500",
+        "Sales": "bg-blue-600",
+        "Automatización": "bg-indigo-600",
+        "Errores": "bg-red-600",
+        "Errores Comunes": "bg-orange-600",
+        "Common Errors": "bg-orange-600",
+        "Ventas": "bg-purple-700",
+        "Rayos X": "bg-cyan-600",
+        "Real Stories": "bg-cyan-600",
+        "Aplicación": "bg-green-500", // Nueva categoría: Aplicación
+        "Application": "bg-green-500",
+        "Default": "bg-gray-500" // Default color if category not found
+    };
+
+    // Function to update the category badge color
+    function updateCategoryBadgeColor() {
+        const categoryBadge = document.getElementById('category-badge');
+        if (categoryBadge) {
+            const categoryName = categoryBadge.dataset.categoryName;
+            // Remove all existing bg- classes to avoid conflicts
+            categoryBadge.classList.forEach(cls => {
+                if (cls.startsWith('bg-')) {
+                    categoryBadge.classList.remove(cls);
+                }
+            });
+            // Add the new background color class
+            const colorClass = categoryColors[categoryName] || categoryColors["Default"];
+            categoryBadge.classList.add(colorClass);
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Add the message box element for audio to the body (if not already there)
+        if (!document.getElementById('audio-message-box')) {
+            const audioMessageBox = document.createElement('div');
+            audioMessageBox.id = 'audio-message-box';
+            document.body.appendChild(audioMessageBox);
+        }
+
+        // Add the message box element for form feedback to the body (if not already there)
+        if (!document.getElementById('form-message-box')) {
+            const formMessageBox = document.createElement('div');
+            formMessageBox.id = 'form-message-box';
+            formMessageBox.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 bg-green-600 text-white p-4 rounded-lg shadow-lg z-50';
+            formMessageBox.style.display = 'none'; // Hidden by default
+            document.body.appendChild(formMessageBox);
+        }
+
+        // Detect browser language and set as initial language if none saved
+        if (!localStorage.getItem('currentLang')) {
+            const browserLang = navigator.language.split('-')[0]; // 'es' de 'es-ES'
+            currentLang = (browserLang === 'es' || browserLang === 'en') ? browserLang : 'es'; // Default to 'es' if not 'es' or 'en'
+            localStorage.setItem('currentLang', currentLang);
+        }
+
+
+        // Event listeners for header navigation links
+        document.querySelectorAll('header nav a').forEach(link => {
+            link.addEventListener('click', (event) => {
+                const href = link.getAttribute('href');
+                // Check if it's an internal hash link (e.g., #home, #focus)
+                if (href.startsWith('#')) {
+                    event.preventDefault(); // Prevent default hash navigation
+                    const sectionId = href.substring(1);
+                    showSection(sectionId); // This function is now mostly a placeholder
+                    history.pushState(null, '', href); // Update URL without reload
+
+                    // Close mobile menu after click (if mobile menu is active)
+                    const navMenu = document.querySelector('header nav');
+                    const mobileMenuButton = document.getElementById('mobile-menu-button');
+                    if (window.getComputedStyle(mobileMenuButton).display !== 'none') {
+                        if (!navMenu.classList.contains('hidden')) {
+                            navMenu.classList.add('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+                            navMenu.classList.remove('flex', 'flex-grow', 'justify-center', 'space-x-10');
+                        }
+                    }
+                }
+                // If it's not a hash link (e.g., "blog.html"), let the browser handle it normally.
+            });
+        });
+
+        // NUEVO: Event listeners for footer quick links
+        document.querySelectorAll('footer ul.space-y-2 a').forEach(link => {
+            link.addEventListener('click', (event) => {
+                const href = link.getAttribute('href');
+                // Only handle internal links (with #) for showSection
+                if (href.startsWith('#')) {
+                    event.preventDefault(); // Prevent default hash navigation
+                    const sectionId = href.substring(1);
+                    showSection(sectionId); // This function is now mostly a placeholder
+                    history.pushState(null, '', href); // Update URL without reload
+                }
+                // If not a hash link (e.g., "blog.html"), let the browser handle it normally.
+            });
+        });
+
+
+        // Event listener for the language button
+        const langBtn = document.getElementById('lang-toggle');
+        langBtn.addEventListener('click', () => {
+            currentLang = currentLang === 'es' ? 'en' : 'es';
+            localStorage.setItem('currentLang', currentLang); // Guardar en el almacenamiento local
+            applyLang();
+        });
+
+        // Manejo del menú móvil
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        mobileMenuButton.addEventListener('click', () => {
+            const navMenu = document.querySelector('header nav');
+            // Solo alternar si está realmente en vista móvil (el botón mobileMenuButton es visible)
+            if (window.getComputedStyle(mobileMenuButton).display !== 'none') {
+                navMenu.classList.toggle('hidden'); // Alternar visibilidad
+
+                // Al mostrar, agregar clases de diseño móvil. Al ocultar, eliminarlas.
+                if (!navMenu.classList.contains('hidden')) { // Si ahora está visible
+                    navMenu.classList.add('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+                    navMenu.classList.remove('flex', 'flex-grow', 'justify-center', 'space-x-10');
+                } else { // Si ahora está oculto
+                    navMenu.classList.remove('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+                    // No volvemos a agregar las clases de escritorio aquí, ya que handleMenuResponsiveness o md:flex lo harán.
+                }
+            }
+        });
+
+        // Lógica para la carga de la imagen del logo (solo vista previa)
+        const logoUploadInput = document.getElementById('logo-upload-input');
+        const currentLogo = document.getElementById('current-logo');
+
+        if (logoUploadInput && currentLogo) {
+            logoUploadInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        currentLogo.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Configurar los formularios del boletín
+        setupNewsletterForm('form-newsletter-es', 'es');
+        setupNewsletterForm('form-newsletter-en', 'en');
+
+        // Lógica de consentimiento de cookies
+        const cookieConsentBanner = document.getElementById('cookie-consent-banner');
+        const acceptCookiesEsBtn = document.getElementById('accept-cookies-es');
+        const acceptCookiesEnBtn = document.getElementById('accept-cookies-en'); // ID corregido
+
+        // Verificar si se ha dado el consentimiento de cookies
+        const hasAcceptedCookies = localStorage.getItem('cookieConsent') === 'accepted';
+
+        if (!hasAcceptedCookies) {
+            // Mostrar el banner después de un breve retraso para permitir que la página se cargue
+            setTimeout(() => {
+                cookieConsentBanner.classList.add('show');
+            }, 1000); // Retraso de 1 segundo
+        } else {
+            cookieConsentBanner.style.display = 'none'; // Mantenerlo oculto si ya se aceptó
+        }
+
+        // Escuchador de eventos para aceptar cookies (Español)
+        if (acceptCookiesEsBtn) {
+            acceptCookiesEsBtn.addEventListener('click', () => {
+                localStorage.setItem('cookieConsent', 'accepted');
+                cookieConsentBanner.classList.remove('show');
+                setTimeout(() => {
+                    cookieConsentBanner.style.display = 'none';
+                }, 500); // Ocultar después de la animación
+            });
+        }
+
+        // Escuchador de eventos para aceptar cookies (Inglés)
+        if (acceptCookiesEnBtn) {
+            acceptCookiesEnBtn.addEventListener('click', () => {
+                localStorage.setItem('cookieConsent', 'accepted');
+                cookieConsentBanner.classList.remove('show');
+                setTimeout(() => {
+                    cookieConsentBanner.style.display = 'none';
+                }, 500); // Ocultar después de la animación
+            });
+        }
+
+
+        // Inicialización
+        applyLang(); // Aplicar idioma al cargar
+        handleMenuResponsiveness(); // Llamada inicial para establecer el estado correcto del menú
+
+        // Escuchador de eventos para el cambio de tamaño de la ventana
+        window.addEventListener('resize', handleMenuResponsiveness);
+    });
+</script>
+
+</body>
+</html>

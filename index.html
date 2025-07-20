@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AI Lab Mind | IA para Servicio al Cliente</title>
+    <!-- TailwindCSS + Google Fonts + Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Nueva fuente: Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        /* Universal box-sizing for consistent layout */
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Outfit', sans-serif;
+            color: #e0e0e0;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            min-height: 100vh; /* Ensure html and body take at least 100% of the viewport height */
+            display: flex; /* Make body a flex container */
+            flex-direction: column; /* Stack body children vertically */
+        }
+        /* Animated background */
+        #animated-background-container {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #5856EC 0%, #5AC8FA 100%);
+            z-index: -2;
+        }
+        #backgroundCanvas {
+            position: absolute; inset: 0; opacity: 0.5;
+        }
+        /* Fixed Header */
+        header {
+            height: auto;
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+
+        /* Additional styles for navigation within the header */
+        nav a {
+            transition: color .2s, background .2s;
+            border-radius: .25rem;
+        }
+
+        nav a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        @media (min-width: 768px) {
+            nav {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        /* Main content container */
+        main {
+            flex-grow: 1; /* Makes main grow to fill available vertical space */
+            display: block; /* Keeps main as a normal block container */
+            overflow-y: auto; /* Adds scrollbar to main if content overflows */
+            -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+            width: 100%; /* Ensure main takes full width */
+        }
+
+        /* Sections */
+        .page {
+            display: none; /* Hidden by default */
+            padding-top: 10rem; /* Ensures space below the fixed header */
+            width: 100%; /* Ensure sections take full width */
+            min-height: calc(100vh - 4.5rem); /* Ensure minimum height for content, accounting for header */
+        }
+        .page.active {
+            display: block; /* Shows as block when active */
+        }
+
+        /* Language content containers */
+        .lang-content {
+            display: none; /* Hidden by default */
+            width: 100%; /* Ensure language content takes full width */
+        }
+        .lang-content.active {
+            display: block; /* Shows as block when active */
+        }
+
+
+        /* Buttons */
+        .btn-primary {
+            background-color: #5856EC; color: #fff;
+            padding: .75rem 1.5rem; border-radius: .375rem;
+            font-weight: 500; transition: background-color .2s, transform .2s;
+        }
+        .btn-primary:hover { background-color: #463BBC; transform: translateY(-2px); }
+        .btn-outline {
+            background: transparent; color: #fff;
+            padding: .75rem 1.5rem; border: 2px solid #fff; border-radius: .375rem;
+            font-weight: 500; transition: box-shadow .2s;
+        }
+        .glow-cyan {
+            box-shadow:
+                0 0 8px rgba(0,220,255,0.8),
+                0 0 16px rgba(0,220,255,0.6),
+                0 0 24px rgba(0,220,255,0.4);
+        }
+        .glow-cyan:hover {
+            box-shadow:
+                0 0 12px rgba(0,220,255,1),
+                0 0 24px rgba(0,220,255,0.8),
+                0 0 32px rgba(0,220,255,0.6);
+        }
+        .blue-outline {
+            text-shadow:
+                -1px -1px 0 #00D,
+                1px -1px 0 #00D,
+                -1px  1px 0 #00D,
+                1px  1px 0 #00D;
+        }
+        /* Footer */
+        footer {
+            background: #111; color: #aaa;
+            padding: 2rem 1rem; font-size: .85rem;
+            margin-top: auto; /* Pushes the footer to the bottom if main doesn't fill all space */
+        }
+        footer a { color: #aaa; transition: color .2s; }
+        footer a:hover { color: #fff; }
+
+
+        /* Agent styles */
+        .agent-card {
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+            border-radius: 0.75rem; /* rounded-lg */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Soft shadow */
+            backdrop-filter: blur(5px); /* Blur effect */
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Agent image container for glow effect */
+        .agent-image-upload-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            display: inline-block;
+            width: 16rem;
+            height: 16rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .agent-image-upload-container::before {
+            content: '';
+            position: absolute;
+            background-color: rgba(0,255,255,0.8);
+            box-shadow: 0 0 10px rgba(0,255,255,0.8), 0 0 20px rgba(0,255,255,0.6);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* Initial animation on load */
+        .agent-image-upload-container.initial-shine::before {
+            opacity: 1;
+            animation: borderBeam 2s ease-out forwards;
+        }
+
+        /* Continuous animation on hover */
+        .agent-image-upload-container:hover::before {
+            opacity: 1;
+            animation: borderBeam 2s linear infinite;
+        }
+
+        /* Keyframes for the border beam animation */
+        @keyframes borderBeam {
+            0% { top: 0; left: 0; width: 0; height: 2px; }
+            25% { top: 0; left: 0; width: 100%; height: 2px; }
+            25.01% { top: 0; left: 100%; width: 2px; height: 0; }
+            50% { top: 0; left: 100%; width: 2px; height: 100%; }
+            50.01% { top: 100%; left: 100%; width: 0; height: 2px; }
+            75% { top: 100%; left: 0; width: 100%; height: 2px; }
+            75.01% { top: 100%; left: 0; width: 2px; height: 0; }
+            99.99% { top: 0; left: 0; width: 2px; height: 100%; }
+            100% { top: 0; left: 0; width: 0; height: 2px; opacity: 0; }
+        }
+
+        /* Blog/article styles */
+        .blog-article {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .blog-article:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Specific style for solutions section background to be semi-transparent */
+        #solutions {
+            background: linear-gradient(to bottom, rgba(88, 86, 236, 0.25), rgba(90, 200, 250, 0.25)); /* Semi-transparent gradient */
+        }
+
+        /* Message box for audio errors */
+        #audio-message-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(220, 38, 38, 0.9); /* Red-500 with opacity */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Message Box for Form Feedback */
+        #form-message-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(16, 185, 129, 0.9); /* Green-500 with opacity */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Cookie Consent Banner Styles */
+        #cookie-consent-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.9); /* Darker background */
+            color: white;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(100%); /* Start hidden below screen */
+            transition: transform 0.5s ease-out; /* Smooth slide-up animation */
+        }
+
+        #cookie-consent-banner.show {
+            transform: translateY(0); /* Slide up to show */
+        }
+
+        #cookie-consent-banner p {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            max-width: 600px;
+        }
+
+        #cookie-consent-banner a {
+            color: #5AC8FA; /* Light blue for links */
+            text-decoration: underline;
+        }
+
+        #cookie-consent-banner button {
+            background-color: #5856EC;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        #cookie-consent-banner button:hover {
+            background-color: #463BBC;
+        }
+
+        @media (min-width: 768px) {
+            #cookie-consent-banner {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 1rem 2rem;
+            }
+            #cookie-consent-banner p {
+                margin-bottom: 0;
+                margin-right: 1rem;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Animated background -->
+<div id="animated-background-container">
+    <canvas id="backgroundCanvas"></canvas>
+</div>
+<!-- Header -->
+<header class="fixed inset-x-0 top-0 bg-black bg-opacity-70 backdrop-blur-md z-10">
+    <div class="flex items-center justify-between w-full max-w-7xl mx-auto px-6 py-3">
+        <!-- Logo + title -->
+        <div class="flex items-center space-x-3">
+            <!-- Logo image container - Removed upload overlay -->
+            <div class="relative w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center overflow-hidden cursor-pointer group" id="logo-upload-container">
+                <!-- Corrected logo image path -->
+                <img alt="AI Lab Mind Logo" class="w-full h-full object-cover" id="current-logo" src="assets/img/logo.png"/>
+                <input type="file" id="logo-upload-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+            </div>
+            <span class="text-xl font-bold text-white" data-en="AI Lab Mind" data-es="AI Lab Mind">AI Lab Mind</span>
+        </div>
+        <!-- Main navigation -->
+        <nav class="hidden md:flex flex-grow justify-center space-x-10 uppercase text-sm">
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="Home" data-es="Inicio" href="#home">Inicio</a>
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="Our Approach" data-es="Enfoque" href="#focus">Enfoque</a>
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="Solutions" data-es="Soluciones" href="#solutions">Soluciones</a>
+            <!-- Blog link now points to blog.html -->
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="Blog" data-es="Blog" href="blog.html">Blog</a>
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="Contact Us" data-es="Contáctanos" href="#contact">Contáctanos</a>
+            <a class="px-2 py-1 hover:text-white text-gray-300" data-en="FAQ" data-es="FAQ" href="#faq">FAQ</a>
+        </nav>
+        <!-- Language button + mobile -->
+        <div class="flex items-center space-x-4">
+            <button class="hidden md:inline-block bg-blue-600 hover:bg-blue-800 text-white px-3 py-1 rounded" id="lang-toggle">
+                ES
+            </button>
+            <button class="md:hidden text-white text-2xl" id="mobile-menu-button">
+                ☰
+            </button>
+        </div>
+    </div>
+</header>
+<!-- Main content -->
+<main>
+    <!-- HOME -->
+    <section class="page active" id="home">
+        <!-- Content in Spanish -->
+        <div class="lang-content" data-lang="es">
+            <div class="container mx-auto px-4 text-center py-16">
+                <h1 class="text-5xl md:text-6xl font-extrabold mb-4">
+                    Revoluciona tu Atención al Cliente con Inteligencia Artificial
+                </h1>
+                <p class="text-xl text-white/80 mb-8 max-w-3xl mx-auto">
+                    Eficiencia sin precedentes, reducción drástica de costos y mejor experiencia del cliente.
+                </p>
+                <div class="flex justify-center gap-4 flex-wrap">
+                    <a class="btn-primary" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="#" target="_blank">Solicitar Demostración Gratuita</a>
+                    <!-- Modified data-es-href and data-en-href to point to #solutions -->
+                    <a class="btn-outline glow-cyan" data-en-href="#solutions" data-es-href="#solutions" href="#solutions">Explora Nuestras Soluciones</a>
+                </div>
+            </div>
+            <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12 py-16">
+                <!-- Mike (Spanish) -->
+                <div class="bg-black/50 p-8 rounded-lg border border-white/20 flex flex-col items-center agent-card">
+                    <div class="agent-image-upload-container group">
+                        <img alt="Mike" class="w-full h-full object-cover" id="mike-image" src="assets/img/mike.png"/>
+                        <input type="file" id="mike-image-upload-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-1">Mike</h3>
+                    <p class="text-sm text-[#5AC8FA] mb-4">Agente de Voz Masculino</p>
+                    <p class="text-white/80 mb-4 text-center">
+                        Confiable, ágil y estratégico. Mike responde llamadas, califica prospectos
+                        y agenda citas con precisión, sin perder el toque humano.
+                    </p>
+                    <ul class="list-disc list-inside text-white/80 mb-6 space-y-1">
+                        <li>Responde llamadas con voz realista</li>
+                        <li>Califica prospectos en segundos</li>
+                        <li>Agenda automáticamente por WhatsApp</li>
+                    </ul>
+                    <button class="btn-primary uppercase" id="mike-btn-es">Probar con Mike</button>
+                    <audio id="mike-audio-es" src="assets/audio/mike.mp3"></audio>
+                </div>
+                <!-- Iris (Spanish) -->
+                <div class="bg-black/50 p-8 rounded-lg border border-white/20 flex flex-col items-center agent-card">
+                    <div class="agent-image-upload-container group">
+                        <img alt="Iris" class="w-full h-full object-cover" id="iris-image" src="assets/img/Iris.png"/>
+                        <input type="file" id="iris-image-upload-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-1">Iris</h3>
+                    <p class="text-sm text-pink-300 mb-4">Agente de Voz Femenina</p>
+                    <p class="text-white/80 mb-4 text-center">
+                        Iris es nuestra agente de voz femenina con personalidad empática y creativa.
+                        Se adapta a las necesidades de tu negocio, ofreciendo una interacción fluida y natural.
+                    </p>
+                    <ul class="list-disc list-inside text-white/80 mb-6 space-y-1">
+                        <li>Inteligencia emocional avanzada</li>
+                        <li>Capacidades educativas</li>
+                        <li>Interacción social natural</li>
+                    </ul>
+                    <button class="btn-primary uppercase" id="iris-btn-es">Hablar con Iris</button>
+                    <audio id="iris-audio-es" src="assets/audio/iris.mp3"></audio>
+                </div>
+            </div>
+            <div class="container mx-auto px-4 text-center py-12 bg-white/10 rounded-lg border border-white/20 mb-16">
+                <h3 class="text-2xl font-semibold mb-4 blue-outline">
+                    El servicio al cliente obsoleto te cuesta caro
+                </h3>
+                <p class="text-white/80 max-w-2xl mx-auto leading-relaxed">
+                    ¿Costos fijos altos? ¿Agentes saturados? ¿IA que no funciona?<br/>
+                    Nuestra IA fiable optimiza operaciones, reduce costos y brinda asistencia 24/7.
+                </p>
+            </div>
+        </div>
+        <!-- Content in English -->
+        <div class="lang-content" data-lang="en">
+            <div class="container mx-auto px-4 text-center py-16">
+                <h1 class="text-5xl md:text-6xl font-extrabold mb-4">
+                    Revolutionary Customer Service with Artificial Intelligence
+                </h1>
+                <p class="text-xl text-white/80 mb-8 max-w-3xl mx-auto">
+                    Unprecedented efficiency, drastic cost reduction, and improved customer experience.
+                </p>
+                <div class="flex justify-center gap-4 flex-wrap">
+                    <a class="btn-primary" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="#" target="_blank">Request a Free Demo</a>
+                    <!-- Modified data-es-href and data-en-href to point to #solutions -->
+                    <a class="btn-outline glow-cyan" data-en-href="#solutions" data-es-href="#solutions" href="#solutions">Explore Our Solutions</a>
+                </div>
+            </div>
+            <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12 py-16">
+                <!-- Mike (English) -->
+                <div class="bg-black/50 p-8 rounded-lg border border-white/20 flex flex-col items-center agent-card">
+                    <div class="agent-image-upload-container group">
+                        <img alt="Mike" class="w-full h-full object-cover" id="mike-image-en" src="assets/img/mike.png"/>
+                        <input type="file" id="mike-image-upload-input-en" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-1">Mike</h3>
+                    <p class="text-sm text-[#5AC8FA] mb-4">Male Voice Agent</p>
+                    <p class="text-white/80 mb-4 text-center">
+                        Reliable, agile, and strategic. Mike answers calls, qualifies leads,
+                        and schedules appointments with precision, without losing the human touch.
+                    </p>
+                    <ul class="list-disc list-inside text-white/80 mb-6 space-y-1">
+                        <li>Answers calls with realistic voice</li>
+                        <li>Qualifies prospects in seconds</li>
+                        <li>Schedules automatically via WhatsApp</li>
+                    </ul>
+                    <button class="btn-primary uppercase" id="mike-btn-en">Try with Mike</button>
+                    <audio id="mike-audio-en" src="assets/audio/mike-en.mp3"></audio>
+                </div>
+                <!-- Iris (English) -->
+                <div class="bg-black/50 p-8 rounded-lg border border-white/20 flex flex-col items-center agent-card">
+                    <div class="agent-image-upload-container group">
+                        <img alt="Iris" class="w-full h-full object-cover" id="iris-image-en" src="assets/img/Iris.png"/>
+                        <input type="file" id="iris-image-upload-input-en" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-1">Iris</h3>
+                    <p class="text-sm text-pink-300 mb-4">Female Voice Agent</p>
+                    <p class="text-white/80 mb-4 text-center">
+                        Iris es nuestra agente de voz femenina con personalidad empática y creativa.
+                        She adapts to your business needs, offering a fluid and natural interaction.
+                    </p>
+                    <ul class="list-disc list-inside text-white/80 mb-6 space-y-1">
+                        <li>Inteligencia emocional avanzada</li>
+                        <li>Capacidades educativas</li>
+                        <li>Interacción social natural</li>
+                    </ul>
+                    <button class="btn-primary uppercase" id="iris-btn-en">Talk to Iris</button>
+                    <audio id="iris-audio-en" src="assets/audio/iris-en.mp3"></audio>
+                </div>
+            </div>
+            <div class="container mx-auto px-4 text-center py-12 bg-white/10 rounded-lg border border-white/20 mb-16">
+                <h3 class="text-2xl font-semibold mb-4 blue-outline">
+                    Outdated customer service costs you dearly
+                </h3>
+                <p class="text-white/80 max-w-2xl mx-auto leading-relaxed">
+                    High fixed costs? Overwhelmed agents? AI that doesn't work?<br/>
+                    Our reliable AI optimizes operations, reduces costs and provides 24/7 assistance.
+                </p>
+            </div>
+        </div>
+    </section>
+    <!-- FOCUS / OUR APPROACH -->
+    <section class="page" id="focus">
+        <!-- Content in Spanish -->
+        <div class="lang-content" data-lang="es">
+            <div class="container mx-auto px-4 max-w-3xl space-y-6 py-16">
+                <h2 class="text-4xl font-extrabold text-center">Nuestra Historia: Haciendo la IA Accesible para Todos</h2>
+                <p class="text-white/80 text-center">
+                    Nos enfocamos en las personas, no solo en la tecnología.<br/>
+                    “¿Por qué solo las grandes empresas deberían beneficiarse de estas innovaciones?”
+                </p>
+                <p class="text-white/80">
+                    Era evidente que no existían herramientas digitales de IA pensadas para la escala y el presupuesto
+                    de un pequeño negocio. Ver cómo el potencial de la IA quedaba fuera del alcance de quienes más
+                    lo necesitaban fue una motivación poderosa.
+                </p>
+                <p class="text-white/80">
+                    Así nació AI Lab Mind. Democratizamos la IA, creando herramientas efectivas, intuitivas y accesibles
+                    para PYMES, sin importar su nivel tecnológico.
+                </p>
+                <p class="text-white/80">
+                    Queremos que cada negocio ofrezca atención excepcional, optimice operaciones y compita en igualdad
+                    de condiciones en el panorama digital actual.
+                </p>
+                <p class="text-white/80">
+                    Creemos en el poder de la IA para impulsar tu crecimiento. Estamos aquí para cumplir esa promesa.
+                    Únete y descubre cómo la IA puede transformar tu empresa.
+                </p>
+                <div class="bg-white/10 backdrop-blur-md rounded-lg p-6">
+                    <h3 class="text-2xl font-semibold mb-4">Beneficios Clave</h3>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-white">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Atención al cliente automatizada que parece humana
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Reducción de costos operativos sin perder calidad
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Integración rápida con WhatsApp, web o teléfono
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Mejora en tiempos de respuesta y satisfacción
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Sin necesidad de conocimientos técnicos
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Herramientas diseñadas para PYMES
+                        </li>
+                    </ul>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="https://koalendar.com/e/ailabmind-es?month=2025-07&duration=30&date=2025-07-10" target="_blank" class="boton-es">Descubre Cómo Puede Funcionar para Ti</a>
+                </div>
+            </div>
+        </div>
+        <!-- Content in English -->
+        <div class="lang-content" data-lang="en">
+            <div class="container mx-auto px-4 max-w-3xl space-y-6 py-16">
+                <h2 class="text-4xl font-extrabold text-center">Our Story: Making AI Accessible to Everyone</h2>
+                <p class="text-white/80 text-center">
+                    We focus on people, not just technology.<br/>
+                    “Why should only large companies benefit from these innovations?”
+                </p>
+                <p class="text-white/80">
+                    It was evident that there were no AI digital tools designed for the scale and budget
+                    of a small business. Seeing how the potential of AI remained out of reach for those who needed it most was a powerful motivation.
+                </p>
+                <p class="text-white/80">
+                    This is how AI Lab Mind was born. We democratize AI, creating effective, intuitive, and accessible tools
+                    for SMEs, regardless of their technological level.
+                </p>
+                <p class="text-white/80">
+                    We want every business to offer exceptional service, optimize operations and compete on equal terms
+                    in today's digital landscape.
+                </p>
+                <p class="text-white/80">
+                    We believe in the power of AI to drive your growth. We are here to fulfill that promise.
+                    Join us and discover how AI can transform your company.
+                </p>
+                <div class="bg-white/10 backdrop-blur-md rounded-lg p-6">
+                    <h3 class="text-2xl font-semibold mb-4">Key Benefits</h3>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-white">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Automated customer service that feels human
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Reduced operating costs without sacrificing quality
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Fast integration with WhatsApp, web, or phone
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Improved response times and satisfaction
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            No technical knowledge required
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-3 mt-1"></i>
+                            Tools designed for SMEs
+                        </li>
+                    </ul>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="https://koalendar.com/e/ailabmind-en?month=2025-07&duration=30&date=2025-07-10" target="_blank" class="boton-en">Discover How It Can Work for You</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- SOLUTIONS -->
+    <section class="page text-white pb-24" id="solutions">
+        <!-- Content in Spanish -->
+        <div class="lang-content" data-lang="es">
+            <div class="container mx-auto px-4 space-y-12 py-16">
+                <div class="text-center space-y-4">
+                    <!-- First title: Nuestras Soluciones Claves -->
+                    <h2 class="text-3xl md:text-4xl font-extrabold">Nuestras Soluciones Claves</h2>
+                    <p class="text-gray-300">
+                        Descubre cómo nuestras soluciones inteligentes pueden transformar tu negocio.
+                        Desde soporte automatizado hasta optimización de procesos.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex flex-col agent-card">
+                        <i class="fas fa-headphones text-pink-400 text-4xl mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2 text-pink-400">Agentes de Voz</h3>
+                        <p class="flex-grow text-gray-200">
+                            Llamadas automatizadas, calificación de leads y agenda de citas 24/7.
+                        </p>
+                        <a class="mt-4 btn-primary bg-pink-500 hover:bg-pink-600" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="#" target="_blank">Saber Más</a>
+                    </div>
+                    <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex flex-col agent-card">
+                        <i class="fas fa-comments text-cyan-400 text-4xl mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2 text-cyan-400">Chatbots Inteligentes</h3>
+                        <p class="flex-grow text-gray-200">
+                            Soporte instantáneo, resolución de FAQ y guía fluida de usuarios en tu web.
+                        </p>
+                        <a class="mt-4 btn-primary bg-cyan-500 hover:bg-cyan-600" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="#" target="_blank">Saber Más</a>
+                    </div>
+                    <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex flex-col agent-card">
+                        <i class="fas fa-calendar-alt text-purple-400 text-4xl mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2 text-purple-400">Automatización de Citas</h3>
+                        <p class="flex-grow text-gray-200">
+                            Automatiza programación, seguimientos y confirmaciones directamente vía IA.
+                        </p>
+                        <a class="mt-4 btn-primary bg-purple-500 hover:bg-purple-600" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="#" target="_blank">Saber Más</a>
+                    </div>
+                </div>
+                <!-- "What we can do for you" block with its cards (Cost Reduction, etc.) -->
+                <div class="space-y-8">
+                    <div class="text-center space-y-2">
+                        <h2 class="text-3xl md:text-4xl font-bold text-cyan-400" data-en="What we can do for you" data-es="Lo que podemos hacer por ti">Lo que podemos hacer por ti</h2>
+                        <p class="text-gray-300" data-en="You are not spending on fashion, with our AI you generate more with less time and money." data-es="No estas gastando en moda, con nuestra IA generas mas con menos tiempo y dinero.">
+                            No estas gastando en moda, con nuestra IA generas mas con menos tiempo y dinero.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex items-start agent-card">
+                            <i class="fas fa-check text-green-400 text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="text-lg font-semibold">Reducción de Costos</h4>
+                                <p class="text-gray-200">
+                                    Automatiza tareas repetitivas y reduce la carga de trabajo de tu equipo de soporte.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex items-start agent-card">
+                            <i class="fas fa-clock text-white text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="text-lg font-semibold">Disponibilidad 24/7</h4>
+                                <p class="text-gray-200">
+                                    Tus clientes siempre tendrán soporte, sin importar la hora o el día.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex items-start agent-card">
+                            <i class="fas fa-star text-yellow-400 text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="text-lg font-semibold">Mejora la Satisfacción del Cliente</h4>
+                                <p class="text-gray-200">
+                                    Ofrece respuestas rápidas y precisas, mejorando la experiencia general del cliente.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex items-start agent-card">
+                            <i class="fas fa-rocket text-white text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="text-lg font-semibold">Escalabilidad y Crecimiento</h4>
+                                <p class="text-gray-200">
+                                    Maneja un volumen creciente de interacciones sin aumentar exponencialmente tu personal.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- "Explore All Our Solutions" block with its cards and buttons redirected to the blog -->
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white uppercase tracking-wider" data-en="Explore all our solutions" data-es="Explora Todas nuestras Soluciones">Explora Todas nuestras Soluciones</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <h3 class="text-lg font-semibold text-pink-400">Agentes de Voz Humanizados</h3>
+                        <p class="text-gray-200">
+                            Iris y Mike atienden llamadas, WhatsApps o chats con voz natural, cálida y profesional.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-pink-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="24/7 Support" data-es="Atención 24/7" href="blog.html">Atención 24/7</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <h3 class="text-lg font-semibold text-cyan-400">Sistema Inteligente para Agendar Citas</h3>
+                        <p class="text-2xl text-gray-200">
+                            Tu agente califica al lead y agenda automáticamente en tu calendario. Sin fricción.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-cyan-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="More converted leads" data-es="Más leads convertidos" href="blog.html">Más leads convertidos</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <i class="fas fa-chart-bar text-purple-400 text-4xl mb-4"></i> <!-- Icon added -->
+                        <h3 class="text-lg font-semibold text-purple-400">Análisis de Llamadas + Propuesta</h3>
+                        <p class="text-gray-200">
+                            Escuchamos tus llamadas y generamos una propuesta automática lista para enviar.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-purple-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="Save hours of follow-up" data-es="Ahorra horas de seguimiento" href="blog.html">Ahorra horas de seguimiento</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <i class="fas fa-cogs text-yellow-400 text-4xl mb-4"></i> <!-- Icon added -->
+                        <h3 class="text-lg font-semibold text-yellow-400">Modular Automations</h3>
+                        <p class="text-gray-200">
+                            Conecta WhatsApp, tu sitio web, CRM y más con plantillas listas para usar.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-yellow-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="No coding needed" data-es="Sin programar" href="blog.html">Sin programar</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <i class="fas fa-file-alt text-green-400 text-4xl mb-4"></i> <!-- Icon added -->
+                        <h3 class="text-lg font-semibold text-green-400">Reportes Inteligentes de Cliente</h3>
+                        <p class="text-gray-200">
+                            Detectamos objeciones, emociones y temas frecuentes. Tú solo decides.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="Actionable data" data-es="Datos accionables" href="blog.html">Datos accionables</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <i class="fas fa-lightbulb text-teal-400 text-4xl mb-4"></i> <!-- Icon added -->
+                        <h3 class="text-lg font-semibold text-teal-400">Asesoría Estratégica para PYMES</h3>
+                        <p class="text-gray-200">
+                            Te ayudamos a decidir qué automatizar, cómo y cuándo. Sin desperdiciar dinero.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-teal-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="Only what you need" data-es="Solo lo que necesitas" href="blog.html">Solo lo que necesitas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Content in English -->
+        <div class="lang-content" data-lang="en">
+            <div class="container mx-auto px-4 space-y-12 py-16">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl md:text-4xl font-extrabold">Our Key Solutions</h2>
+                    <p class="text-gray-300">
+                        Discover how our smart solutions can transform your business.
+                        From automated support to process optimization.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex flex-col agent-card">
+                        <i class="fas fa-headphones text-pink-400 text-4xl mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2 text-pink-400">Voice Agents</h3>
+                        <p class="flex-grow text-gray-200">
+                            Automated calls, lead qualification, and appointment scheduling 24/7.
+                        </p>
+                        <a class="mt-4 btn-primary bg-pink-500 hover:bg-pink-600" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="#" target="_blank">Learn More</a>
+                    </div>
+                    <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex flex-col agent-card">
+                        <i class="fas fa-comments text-cyan-400 text-4xl mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2 text-cyan-400">Smart Chatbots</h3>
+                        <p class="flex-grow text-gray-200">
+                            Instant support, FAQ resolution, and seamless user guidance on your website.
+                        </p>
+                        <a class="mt-4 btn-primary bg-cyan-500 hover:bg-cyan-600" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="#" target="_blank">Learn More</a>
+                    </div>
+                    <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex flex-col agent-card">
+                        <i class="fas fa-calendar-alt text-purple-400 text-4xl mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2 text-purple-400">Appointment Automation</h3>
+                        <p class="flex-grow text-gray-200">
+                            Automate scheduling, follow-ups, and confirmations directly via AI.
+                        </p>
+                        <a class="mt-4 btn-primary bg-purple-500 hover:bg-purple-600" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="#" target="_blank">Learn More</a>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <div class="text-center space-y-2">
+                        <h2 class="text-3xl md:text-4xl font-bold text-cyan-400" data-en="What we can do for you" data-es="Lo que podemos hacer por ti">What we can do for you</h2>
+                        <p class="text-gray-300" data-en="You are not spending on fashion, with our AI you generate more with less time and money." data-es="No estas gastando en moda, con nuestra IA generas mas con menos tiempo y dinero.">
+                            You are not spending on fashion, with our AI you generate more with less time and money.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex items-start agent-card">
+                            <i class="fas fa-check text-green-400 text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="text-lg font-semibold">Cost Reduction</h4>
+                                <p class="text-gray-200">
+                                    Automate repetitive tasks and reduce your support team's workload.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex items-start agent-card">
+                            <i class="fas fa-clock text-white text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="text-lg font-semibold">24/7 Availability</h4>
+                                <p class="text-gray-200">
+                                    Your customers will always have support, no matter the time or day.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex items-start agent-card">
+                            <i class="fas fa-star text-yellow-400 text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="text-lg font-semibold">Improve Customer Satisfaction</h4>
+                                <p class="text-gray-200">
+                                    Provide quick and accurate answers, improving the overall customer experience.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="bg-black/50 border border-white/20 rounded-lg p-6 flex items-start agent-card">
+                            <i class="fas fa-rocket text-white text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="text-lg font-semibold">Escalability and Growth</h4>
+                                <p class="text-gray-200">
+                                    Handle a growing volume of interactions without exponentially increasing your staff.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white uppercase tracking-wider" data-en="Explore all our solutions" data-es="Explora Todas nuestras Soluciones">Explore all our solutions</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <h3 class="text-lg font-semibold text-pink-400">Humanized Voice Agents</h3>
+                        <p class="text-gray-200">
+                            Iris y Mike atienden llamadas, WhatsApps o chats con voz natural, cálida y profesional.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-pink-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="24/7 Support" data-es="Atención 24/7" href="blog.html">24/7 Support</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <h3 class="text-lg font-semibold text-cyan-400">Smart Appointment Scheduling System</h3>
+                        <p class="text-2xl text-gray-200">
+                            Tu agente califica al lead y agenda automáticamente en tu calendario. Sin fricción.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-cyan-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="More converted leads" data-es="Más leads convertidos" href="blog.html">More converted leads</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <i class="fas fa-chart-bar text-purple-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-semibold text-purple-400">Call Analysis + Proposal</h3>
+                        <p class="text-gray-200">
+                            Escuchamos tus llamadas y generamos una propuesta automática lista para enviar.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-purple-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="Save hours of follow-up" data-es="Ahorra horas de seguimiento" href="blog.html">Save hours of follow-up</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <i class="fas fa-cogs text-yellow-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-semibold text-yellow-400">Modular Automations</h3>
+                        <p class="text-gray-200">
+                            Conecta WhatsApp, tu sitio web, CRM y más con plantillas listas para usar.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-yellow-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="No coding needed" data-es="Sin programar" href="blog.html">No coding needed</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <i class="fas fa-file-alt text-green-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-semibold text-green-400">Smart Customer Reports</h3>
+                        <p class="text-gray-200">
+                            Detectamos objeciones, emociones y temas frecuentes. Tú solo decides.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="Actionable data" data-es="Datos accionables" href="blog.html">Actionable data</a>
+                    </div>
+                    <div class="bg-black/30 backdrop-blur-sm p-6 rounded-lg agent-card">
+                        <i class="fas fa-lightbulb text-teal-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-semibold text-teal-400">Asesoría Estratégica para PYMES</h3>
+                        <p class="text-gray-200">
+                            Te ayudamos a decidir qué automatizar, cómo y cuándo. Sin desperdiciar dinero.
+                        </p>
+                        <!-- Enlace corregido a blog.html -->
+                        <a class="inline-block bg-teal-500 text-white text-xs px-2 py-1 rounded mt-4" data-en="Only what you need" data-es="Solo lo que necesitas" href="blog.html">Only what you need</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- BLOG -->
+    <section class="page" id="blog">
+        <!-- Contenido en Español -->
+        <div class="lang-content" data-lang="es">
+            <section class="container mx-auto px-4 py-16 text-white">
+                <div class="text-center">
+                    <h2 class="text-4xl font-bold mb-8">Blog</h2>
+                    <!-- Sección de Destacados por Categoría -->
+                    <h3 class="text-3xl font-semibold mb-6 text-center" data-es="Destacados por Categoría" data-en="Featured by Category">Destacados por Categoría</h3>
+                    <!-- Pequeño menú de categorías para destacados -->
+                    <div class="flex flex-wrap justify-center gap-4 mb-8">
+                        <button class="filter-btn-featured btn-primary bg-gray-600 hover:bg-gray-500" data-es="Ver Todos" data-en="View All" data-filter="all">Ver Todos</button>
+                        <button class="filter-btn-featured btn-primary bg-indigo-500 hover:bg-indigo-400" data-es="Automatización" data-en="Automation" data-filter="automation">Automatización</button>
+                        <button class="filter-btn-featured btn-primary bg-purple-500 hover:bg-purple-400" data-es="Estrategia" data-en="Strategy" data-filter="strategy">Estrategia</button>
+                        <button class="filter-btn-featured btn-primary bg-green-500 hover:bg-green-400" data-es="Ventas" data-en="Sales" data-filter="sales">Ventas</button>
+                        <button class="filter-btn-featured btn-primary bg-pink-500 hover:bg-pink-400" data-es="Errores Comunes" data-en="Common Errors" data-filter="common-errors">Errores Comunes</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12" id="featured-posts">
+                        <!-- Posts destacados se cargarán aquí con JavaScript -->
+                    </div>
+                    <!-- Todos los Artículos -->
+                    <h3 class="text-3xl font-semibold mb-6 text-left" data-es="Todos los Artículos" data-en="All Articles">Todos los Artículos</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="all-posts">
+                        <!-- Todos los posts se cargarán aquí con JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- Contenido en Inglés -->
+        <div class="lang-content" data-lang="en">
+            <section class="container mx-auto px-4 py-16 text-white">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold mb-8">Blog</h2>
+                    <!-- Featured by Category Section -->
+                    <h3 class="text-3xl font-semibold mb-6 text-left">Featured by Category</h3>
+                    <div class="flex flex-wrap justify-center gap-4 mb-8">
+                        <button class="filter-btn-featured btn-primary bg-gray-600 hover:bg-gray-500" data-es="Ver Todos" data-en="View All" data-filter="all">View All</button>
+                        <button class="filter-btn-featured btn-primary bg-indigo-500 hover:bg-indigo-400" data-es="Automatización" data-en="Automation" data-filter="automation">Automation</button>
+                        <button class="filter-btn-featured btn-primary bg-purple-500 hover:bg-purple-400" data-es="Estrategia" data-en="Strategy" data-filter="strategy">Strategy</button>
+                        <button class="filter-btn-featured btn-primary bg-green-500 hover:bg-green-400" data-es="Ventas" data-en="Sales" data-filter="sales">Sales</button>
+                        <button class="filter-btn-featured btn-primary bg-pink-500 hover:bg-pink-400" data-es="Errores Comunes" data-en="Common Errors" data-filter="common-errors">Common Errors</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12" id="featured-posts-en">
+                        <!-- Featured posts will be loaded here by JavaScript -->
+                    </div>
+                    <!-- All Articles -->
+                    <h3 class="text-3xl font-semibold mb-6 text-left">All Articles</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="all-posts-en">
+                        <!-- All posts will be loaded here by JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <!-- CONTACT US -->
+    <section class="page" id="contact">
+        <!-- Content in Spanish -->
+        <div class="lang-content" data-lang="es">
+            <div class="container mx-auto px-4 max-w-3xl text-center py-16">
+                <h2 class="text-4xl font-extrabold mb-8 text-white" data-i18n="contact_title">Contáctanos</h2>
+                <p class="text-white/80 max-w-2xl mx-auto mb-12" data-i18n="contact_description" data-es="Estamos listos para revolucionar tu servicio al cliente. Envíanos un mensaje y te responderemos a la brevedad." data-en="We are ready to revolutionize your customer service. Send us a message and we will respond shortly.">
+                    Estamos listos para revolucionar tu servicio al cliente. Envíanos un mensaje y te responderemos a la brevedad.
+                </p>
+                <!-- Scheduling elements moved above the form -->
+                <div class="flex flex-col items-center space-y-4 mb-8">
+                    <p class="text-white/80" data-es="Agenda una demostración gratuita directamente:" data-en="Schedule a free demo directly:">Agenda una demostración gratuita directamente:</p>
+                    <a class="btn-primary" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="https://koalendar.com/e/ailabmind-en" target="_blank">Agendar Demostración</a>
+                </div>
+                <!-- Contact form (Spanish) -->
+                <form id="form-contacto-es" class="max-w-xl mx-auto bg-black bg-opacity-30 p-6 rounded-2xl backdrop-blur-md shadow-lg space-y-4 text-white">
+                    <h2 class="text-2xl font-semibold text-center" data-es="Contáctanos" data-en="Contact Us">Contáctanos</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="nombre" data-es-placeholder="Nombre" data-en-placeholder="Name" placeholder="Nombre" required class="w-full p-3 rounded-xl bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        <input type="text" name="apellido" data-es-placeholder="Apellido" data-en-placeholder="Last Name" placeholder="Apellido" required class="w-full p-3 rounded-xl bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    </div>
+
+                    <input type="email" name="email" data-es-placeholder="Correo electrónico" data-en-placeholder="Email" placeholder="Correo electrónico" required class="w-full p-3 rounded-xl bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500">
+
+                    <textarea name="mensaje" rows="4" data-es-placeholder="Escribe tu mensaje..." data-en-placeholder="Write your message..." placeholder="Escribe tu mensaje..." required class="w-full p-3 rounded-xl bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"></textarea>
+
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" name="consentimiento" required class="form-checkbox text-pink-500 focus:ring-pink-500 rounded">
+                        <span data-es="Acepto la <a href='privacy.html' class='underline text-blue-400' target='_blank'>política de privacidad</a>" data-en="I accept the <a href='privacy-en.html' class='underline text-blue-400' target='_blank'>privacy policy</a>">Acepto la <a href='privacy.html' class='underline text-blue-400' target='_blank'>política de privacidad</a></span>
+                    </label>
+
+                    <input type="hidden" name="idioma" value="es">
+                    <input type="hidden" name="fecha" id="fecha-es">
+
+                    <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white font-bold text-lg shadow-lg hover:scale-105 transition-all duration-300" data-es="Enviar" data-en="Send">
+                        Enviar
+                    </button>
+
+                    <p id="mensaje-confirmacion-es" class="text-center text-green-400 font-medium hidden mt-2" data-es="¡Formulario enviado con éxito!" data-en="Form submitted successfully!">¡Formulario enviado con éxito!</p>
+                </form>
+            </div>
+        </div>
+        <!-- Content in English -->
+        <div class="lang-content" data-lang="en">
+            <div class="container mx-auto px-4 max-w-3xl text-center py-16">
+                <h2 class="text-4xl font-extrabold mb-8 text-white" data-i18n="contact_title">Contact Us</h2>
+                <p class="text-white/80 max-w-2xl mx-auto mb-12" data-i18n="contact_description" data-es="Estamos listos para revolucionar tu servicio al cliente. Envíanos un mensaje y te responderemos a la brevedad." data-en="We are ready to revolutionize your customer service. Send us a message and we will respond shortly.">
+                    We are ready to revolutionize your customer service. Send us a message and we will respond shortly.
+                </p>
+                <!-- Scheduling elements moved above the form -->
+                <div class="flex flex-col items-center space-y-4 mb-8">
+                    <p class="text-white/80" data-es="Agenda una demostración gratuita directamente:" data-en="Schedule a free demo directly:">Schedule a free demo directly:</p>
+                    <a class="btn-primary" data-en-href="https://koalendar.com/e/ailabmind-en" data-es-href="https://koalendar.com/e/ailabmind-es" href="https://koalendar.com/e/ailabmind-en" target="_blank">Schedule Demo</a>
+                </div>
+                <!-- Contact form (English) -->
+                <form id="form-contacto-en" class="max-w-xl mx-auto bg-black bg-opacity-30 p-6 rounded-2xl backdrop-blur-md shadow-lg space-y-4 text-white">
+                    <h2 class="text-2xl font-semibold text-center" data-es="Contáctanos" data-en="Contact Us">Contact Us</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="nombre" data-es-placeholder="Nombre" data-en-placeholder="Name" placeholder="Name" required class="w-full p-3 rounded-xl bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        <input type="text" name="apellido" data-es-placeholder="Apellido" data-en-placeholder="Last Name" placeholder="Last Name" required class="w-full p-3 rounded-xl bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    </div>
+
+                    <input type="email" name="email" data-es-placeholder="Correo electrónico" data-en-placeholder="Email" placeholder="Email" required class="w-full p-3 rounded-xl bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500">
+
+                    <textarea name="mensaje" rows="4" data-es-placeholder="Escribe tu mensaje..." data-en-placeholder="Write your message..." placeholder="Write your message..." required class="w-full p-3 rounded-xl bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"></textarea>
+
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" name="consentimiento" required class="form-checkbox text-pink-500 focus:ring-pink-500 rounded">
+                        <span data-es="Acepto la <a href='privacy.html' class='underline text-blue-400' target='_blank'>política de privacidad</a>" data-en="I accept the <a href='privacy-en.html' class='underline text-blue-400' target='_blank'>privacy policy</a>">I accept the <a href='privacy-en.html' class='underline text-blue-400' target='_blank'>privacy policy</a></span>
+                    </label>
+
+                    <input type="hidden" name="idioma" value="en">
+                    <input type="hidden" name="fecha" id="fecha-en">
+
+                    <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white font-bold text-lg shadow-lg hover:scale-105 transition-all duration-300" data-es="Enviar" data-en="Send">
+                        Send
+                    </button>
+
+                    <p id="mensaje-confirmacion-en" class="text-center text-green-400 font-medium hidden mt-2" data-es="¡Formulario enviado con éxito!" data-en="Form submitted successfully!">Form submitted successfully!</p>
+                </form>
+            </div>
+        </div>
+        <!-- Message Box for Form Feedback -->
+        <div id="form-message-box" style="display: none;" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-green-600 text-white p-4 rounded-lg shadow-lg z-50">
+            <!-- Message will be inserted here by JavaScript -->
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="page" id="faq">
+        <!-- Content in Spanish -->
+        <div class="lang-content" data-lang="es">
+            <div class="container mx-auto px-4 max-w-3xl py-16">
+                <h2 class="text-4xl font-extrabold text-center mb-8">Preguntas Frecuentes (FAQ)</h2>
+                <div class="space-y-6">
+                    <!-- FAQ Item 1 (Existing) -->
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Qué es AI Lab Mind?</h3>
+                        <p class="text-white/80">
+                            AI Lab Mind es una empresa que democratiza el acceso a la inteligencia artificial para PYMES,
+                            ofreciendo soluciones de atención al cliente automatizadas y escalables.
+                        </p>
+                    </div>
+                    <!-- FAQ Item 2 (Existing) -->
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Cómo puede la IA reducir mis costos?</h3>
+                        <p class="text-white/80">
+                            Nuestra IA automatiza tareas repetitivas como responder preguntas frecuentes, calificar leads y agendar citas,
+                            reduciendo la necesidad de personal dedicado a estas tareas 24/7.
+                        </p>
+                    </div>
+                    <!-- FAQ Item 3 (Existing) -->
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Necesito conocimientos técnicos para usar su plataforma?</h3>
+                        <p class="text-white/80">
+                            No, nuestras soluciones están diseñadas para ser intuitivas y fáciles de usar, sin requerir conocimientos técnicos avanzados.
+                            Nosotros nos encargamos de la implementación y configuración.
+                        </p>
+                    </div>
+                    <!-- New FAQ Items from index_faq_corregido.html - ES -->
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Qué es un agente de voz?</h3>
+                        <p class="text-white/80">Es una inteligencia artificial que responde a tus clientes usando voz natural.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿En qué idiomas funciona?</h3>
+                        <p class="text-white/80">Español e inglés por ahora, pronto más.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Cómo se instala?</h3>
+                        <p class="text-white/80">No necesitas instalar nada. Lo conectamos a tu WhatsApp o página web.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Puedo personalizar lo que dice?</h3>
+                        <p class="text-white/80">Sí. Adaptamos el guion a tu negocio.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Qué incluye el servicio?</h3>
+                        <p class="text-white/80">Configuración inicial, mantenimiento y mejoras continuas.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Cuánto cuesta?</h3>
+                        <p class="text-white/80">Desde 1.000 € por la implementación + mensualidad según uso.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Puedo probarlo antes de comprar?</h3>
+                        <p class="text-white/80">Sí. Puedes agendar una demo sin compromiso.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Y si no tengo conocimientos técnicos?</h3>
+                        <p class="text-white/80">No te preocupes, nosotros nos encargamos de todo.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Qué pasa si tengo dudas después?</h3>
+                        <p class="text-white/80">Siempre tendrás soporte y actualizaciones.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">Do you have other products besides the voice agent?</h3>
+                        <p class="text-white/80">Sí. Automatizaciones, análisis de llamadas y más.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Funciona en cualquier país?</h3>
+                        <p class="text-white/80">Sí. Nuestros agentes son globales.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Qué necesito para empezar?</h3>
+                        <p class="text-white/80">Solo agendar una demo. Nosotros hacemos el resto.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Content in English -->
+        <div class="lang-content" data-lang="en">
+            <div class="container mx-auto px-4 max-w-3xl py-16">
+                <h2 class="text-4xl font-extrabold text-center mb-8">Frequently Asked Questions (FAQ)</h2>
+                <div class="space-y-6">
+                    <!-- FAQ Item 1 (Existing) -->
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">What is AI Lab Mind?</h3>
+                        <p class="text-white/80">
+                            AI Lab Mind is a company that democratizes access to artificial intelligence for SMEs,
+                            offering automated and scalable customer service solutions.
+                        </p>
+                    </div>
+                    <!-- FAQ Item 2 (Existing) -->
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">How can AI reduce my costs?</h3>
+                        <p class="text-white/80">
+                            Our AI automatizes repetitive tasks such as answering FAQs, qualifying leads, and scheduling appointments,
+                            reducing the need for staff dedicated to these tasks 24/7.
+                        </p>
+                    </div>
+                    <!-- FAQ Item 3 (Existing) -->
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">Do I need technical knowledge to use your platform?</h3>
+                        <p class="text-white/80">
+                            No, our solutions are designed to be intuitive and easy to use, requiring no advanced technical knowledge.
+                            We handle implementation and configuration.
+                        </p>
+                    </div>
+                    <!-- New FAQ Items from index_faq_corregido.html - EN -->
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">What is a voice agent?</h3>
+                        <p class="text-white/80">It's an artificial intelligence that responds to your customers using natural voice.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">What languages does it work in?</h3>
+                        <p class="text-white/80">Spanish and English for now, more coming soon.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">How is it installed?</h3>
+                        <p class="text-white/80">You don't need to install anything. We connect it to your WhatsApp or website.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">Can I customize what it says?</h3>
+                        <p class="text-white/80">Yes. We adapt the script to your business.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">What does the service include?</h3>
+                        <p class="text-white/80">Initial setup, maintenance, and continuous improvements.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">How much does it cost?</h3>
+                        <p class="text-white/80">From €1,000 for implementation + monthly fee depending on usage.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">Can I try it before buying?</h3>
+                        <p class="text-white/80">Yes. You can schedule a no-obligation demo.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">¿Y si no tengo conocimientos técnicos?</h3>
+                        <p class="text-white/80">Don't worry, we take care of everything.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">What happens if I have questions later?</h3>
+                        <p class="text-white/80">You will always have support and updates.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">Do you have other products besides the voice agent?</h3>
+                        <p class="text-white/80">Yes. Automations, call analysis, and more.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">Does it work in any country?</h3>
+                        <p class="text-white/80">Sí. Nuestros agentes son globales.</p>
+                    </div>
+                    <div class="bg-black/50 p-6 rounded-lg border border-white/20">
+                        <h3 class="text-xl font-semibold mb-2">What do I need to get started?</h3>
+                        <p class="text-white/80">Just schedule a demo. We do the rest.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- END FAQ -->
+
+</main>
+<!-- Cookie Consent Banner -->
+<div id="cookie-consent-banner">
+    <div class="lang-content" data-lang="es">
+        <p>Utilizamos cookies propias y de terceros para mejorar nuestros servicios y mostrarte publicidad relacionada con tus preferencias. Al continuar navegando, consideramos que aceptas su uso. Para más información, puedes consultar nuestra <a href="cookies.html" target="_blank">Política de Cookies</a>.</p>
+        <button id="accept-cookies-es">Entendido</button>
+    </div>
+    <div class="lang-content" data-lang="en">
+        <p>We use our own and third-party cookies to improve our services and show you advertising related to your preferences. By continuing to browse, we consider that you accept their use. For more information, you can consult our <a href="cookies-en.html" target="_blank">Cookie Policy</a>.</p>
+        <button id="accept-cookies-en">Got it</button>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="container mx-auto grid md:grid-cols-4 gap-8 px-4">
+        <div>
+            <h3 class="text-white font-semibold mb-2" data-en="AI Lab Mind" data-es="AI Lab Mind">AI Lab Mind</h3>
+            <!-- Línea de dirección eliminada -->
+            <p data-en="Email: info@ailabmind.com" data-es="Email: info@ailabmind.com">Email: info@ailabmind.com</p>
+        </div>
+        <div>
+            <h3 class="text-white font-semibold mb-2" data-en="Quick Links" data-es="Enlaces Rápidos">Enlaces Rápidos</h3>
+            <ul class="space-y-2">
+                <li><a data-en="Home" data-es="Inicio" href="#home" data-es-href="#home" data-en-href="#home">Inicio</a></li>
+                <li><a data-en="Our Approach" data-es="Enfoque" href="#focus" data-es-href="#focus" data-en-href="#focus">Enfoque</a></li>
+                <li><a data-en="Solutions" data-es="Soluciones" href="#solutions" data-es-href="#solutions" data-en-href="#solutions">Soluciones</a></li>
+                <!-- Enlace del Blog en Footer ahora apunta a blog.html -->
+                <li><a data-en="Blog" data-es="Blog" href="blog.html" data-es-href="blog.html" data-en-href="blog-en.html">Blog</a></li>
+                <li><a data-en="Contact Us" data-es="Contáctanos" href="#contact" data-es-href="#contact" data-en-href="#contact">Contáctanos</a></li>
+                <li><a data-en="FAQ" data-es="FAQ" href="#faq" data-es-href="#faq" data-en-href="#faq">FAQ</a></li>
+            </ul>
+        </div>
+        <div>
+            <h3 class="text-white font-semibold mb-2" data-en="Follow Us" data-es="Síguenos">Síguenos</h3>
+            <ul class="space-y-2">
+                <li><a data-en="LinkedIn" data-es="LinkedIn" href="https://linkedin.com/company/105943016" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                <li><a data-en="TikTok" data-es="TikTok" href="https://tiktok.com/@ailabmind" target="_blank" rel="noopener noreferrer">TikTok</a></li>
+                <li><a data-en="Facebook" data-es="Facebook" href="https://facebook.com/ailabmind" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+                <li><a data-en="YouTube" data-es="YouTube" href="https://youtube.com/@AILabMind" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+                <li><a data-en="Instagram" data-es="Instagram" href="https://instagram.com/ailabmind" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+            </ul>
+        </div>
+        <div>
+            <!-- Newsletter form (Spanish) -->
+            <form id="form-newsletter-es" class="space-y-4 text-white text-sm max-w-xs">
+                <label class="block font-semibold text-white mb-1" data-es="Boletín" data-en="Newsletter">Boletín</label>
+
+                <input type="email" name="email" required
+                    data-es-placeholder="Tu correo electrónico" data-en-placeholder="Your email address"
+                    placeholder="Tu correo electrónico"
+                    class="w-full px-4 py-2 rounded-lg bg-gray-800 placeholder-white/60 text-white border-none focus:ring-2 focus:ring-blue-500 transition" />
+
+                <label class="flex items-start gap-2 text-white/90 text-sm leading-tight">
+                    <input type="checkbox" name="consentimiento" required
+                        class="mt-1 form-checkbox text-blue-500 rounded border-gray-600 focus:ring-blue-500" />
+                    <span data-es="He leído y acepto la <a href='privacy.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Política de Privacidad</a>."
+                          data-en="I have read and accept the <a href='privacy-en.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Privacy Policy</a>.">
+                        He leído y acepto la <a href='privacy.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Política de Privacidad</a>.
+                    </span>
+                </label>
+
+                <input type="hidden" name="idioma" value="es">
+                <input type="hidden" name="fecha" id="fecha-newsletter-es">
+
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-2 rounded-lg hover:opacity-90 transition"
+                    data-es="Suscribirse" data-en="Subscribe">
+                    Suscribirse
+                </button>
+
+                <p id="newsletter-confirmacion-es" class="hidden text-green-400 font-medium text-sm text-center mt-2"
+                    data-es="¡Gracias por suscribirte!" data-en="Thanks for subscribing!">¡Gracias por suscribirte!</p>
+            </form>
+
+            <!-- Newsletter form (English) -->
+            <form id="form-newsletter-en" class="space-y-4 text-white text-sm max-w-xs" style="display:none;">
+                <label class="block font-semibold text-white mb-1" data-es="Boletín" data-en="Newsletter">Newsletter</label>
+
+                <input type="email" name="email" required
+                    data-es-placeholder="Tu correo electrónico" data-en-placeholder="Your email address"
+                    placeholder="Your email address"
+                    class="w-full px-4 py-2 rounded-lg bg-gray-800 placeholder-white/60 text-white border-none focus:ring-2 focus:ring-blue-500 transition" />
+
+                <label class="flex items-start gap-2 text-white/90 text-sm leading-tight">
+                    <input type="checkbox" name="consentimiento" required
+                        class="mt-1 form-checkbox text-blue-500 rounded border-gray-600 focus:ring-blue-500" />
+                    <span data-es="He leído y acepto la <a href='privacy.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Política de Privacidad</a>."
+                          data-en="I have read and accept the <a href='privacy-en.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Privacy Policy</a>.">
+                        I have read and accept the <a href='privacy-en.html' target='_blank' class='underline text-blue-400 hover:text-blue-300 transition'>Privacy Policy</a>.
+                    </span>
+                </label>
+
+                <input type="hidden" name="idioma" value="en">
+                <input type="hidden" name="fecha" id="fecha-newsletter-en">
+
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-2 rounded-lg hover:opacity-90 transition"
+                    data-es="Suscribirse" data-en="Subscribe">
+                    Subscribe
+                </button>
+
+                <p id="newsletter-confirmacion-en" class="hidden text-green-400 font-medium text-sm text-center mt-2"
+                    data-es="¡Gracias por suscribirte!" data-en="Thanks for subscribing!">Thanks for subscribing!</p>
+            </form>
+        </div>
+    </div>
+    <div class="text-center text-gray-500 text-sm mt-4" data-en="© 2025 AI Lab Mind. All rights reserved." data-es="© 2025 AI Lab Mind. Todos los derechos reservados.">© 2025 AI Lab Mind. Todos los derechos reservados.</div>
+    <div class="mt-4 text-center text-sm text-white">
+        <!-- Enlaces Legales en Español -->
+        <div class="lang-content" data-lang="es">
+            <a class="mx-2 hover:underline" href="terms.html">Términos</a>
+            <a class="mx-2 hover:underline" href="privacy.html">Privacidad</a>
+            <a class="mx-2 hover:underline" href="cookies.html">Cookies</a>
+            <a class="mx-2 hover:underline" href="legal.html">Aviso Legal</a>
+        </div>
+        <!-- Enlaces Legales en Inglés -->
+        <div class="lang-content" data-lang="en">
+            <a class="mx-2 hover:underline" href="terms-en.html">Terms</a>
+            <a class="mx-2 hover:underline" href="privacy-en.html">Privacy</a>
+            <a class="mx-2 hover:underline" href="cookies-en.html">Cookies</a>
+            <a class="mx-2 hover:underline" href="legal-en.html">Legal Notice</a>
+        </div>
+    </div>
+</footer>
+<!-- Scripts -->
+<script>
+    // Animación de ondas
+    const canvas = document.getElementById('backgroundCanvas'), ctx = canvas.getContext('2d');
+    let W,H;
+    function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    const waves = [
+        { amp:70, freq:0.005, spd:0.0001, color:'rgba(0,220,255,0.7)', lw:3, sc:'rgba(0,220,255,1)' },
+        { amp:80, freq:0.0045, spd:0.00012, color:'rgba(180,0,255,0.7)', lw:3, sc:'rgba(180,0,255,1)' },
+        { amp:65, freq:0.0055, spd:-0.00015, color:'rgba(50,150,255,0.6)', lw:2.8, sc:'rgba(50,150,255,1)' },
+        { amp:75, freq:0.0048, spd:0.00008, color:'rgba(255,100,200,0.7)', lw:3.2, sc:'rgba(255,100,200,1)' },
+        { amp:60, freq:0.006, spd:0.00007, color:'rgba(0,255,180,0.6)', lw:2.5, sc:'rgba(0,255,180,1)' },
+        { amp:85, freq:0.0042, spd:-0.0001, color:'rgba(220,150,255,0.7)', lw:3.5, sc:'rgba(220,150,255,1)' },
+        { amp:72, freq:0.0053, spd:0.00014, color:'rgba(0,100,255,0.6)', lw:2.9, sc:'rgba(0,100,255,1)' },
+        { amp:68, freq:0.0058, spd:0.00009, color:'rgba(255,0,255,0.7)', lw:3.1, sc:'rgba(255,0,255,1)' }
+    ];
+
+    function draw(t){
+        ctx.clearRect(0,0,W,H);
+        waves.forEach(w=>{
+            ctx.beginPath();
+            ctx.strokeStyle = w.color;
+            ctx.lineWidth   = w.lw;
+            ctx.shadowBlur  = w.lw * 4;
+            ctx.shadowColor = w.sc;
+            for(let x=0; x<=W; x+=4){
+                const y = H/2 + Math.sin(x*w.freq + t*w.spd) * w.amp;
+                x===0? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+            }
+            ctx.stroke();
+        });
+        requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+    // Funciones para el manejo de secciones y idioma
+    let currentLang = localStorage.getItem('currentLang') || 'es'; // Idioma por defecto
+
+    // Función auxiliar para actualizar el contenido de idioma de la sección activa
+    function updateLanguageContentForActiveSection() {
+        const activeSection = document.querySelector('.page.active');
+        if (activeSection) {
+            console.log(`[index.html - updateLangContent] Actualizando contenido de idioma para la sección: ${activeSection.id}`);
+            activeSection.querySelectorAll('.lang-content').forEach(langDiv => {
+                if (langDiv.dataset.lang === currentLang) {
+                    langDiv.classList.add('active');
+                    langDiv.style.display = 'block';
+                    console.log(`[index.html - updateLangContent] -> Activado lang-content: ${langDiv.dataset.lang}, Display: ${langDiv.style.display}`);
+                } else {
+                    langDiv.classList.remove('active');
+                    langDiv.style.display = 'none';
+                    console.log(`[index.html - updateLangContent] -> Desactivado lang-content: ${langDiv.dataset.lang}, Display: ${langDiv.style.display}`);
+                }
+            });
+        } else {
+            console.warn('[index.html - updateLangContent] No hay sección activa para actualizar el contenido de idioma.');
+        }
+    }
+
+    function showSection(sectionId) {
+        console.log('[index.html - showSection] called for:', sectionId);
+
+        // Ocultar todas las secciones primero
+        document.querySelectorAll('.page').forEach(section => {
+            section.classList.remove('active');
+            section.style.display = 'none'; // Asegurarse de que esté oculto
+            // También ocultar todos los contenidos de idioma dentro de las secciones
+            section.querySelectorAll('.lang-content').forEach(langDiv => {
+                langDiv.classList.remove('active');
+                langDiv.style.display = 'none';
+            });
+            console.log('[index.html - showSection] Sección oculta:', section.id);
+        });
+
+        // Mostrar la sección de destino
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.classList.add('active');
+            targetSection.style.display = 'block'; // Asegurarse de que esté visible
+            console.log('[index.html - showSection] Sección activada y mostrada:', sectionId, 'Display:', targetSection.style.display);
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Desplazarse al inicio de la página
+
+            // Llamar a la función auxiliar para asegurar que el contenido de idioma se muestre
+            updateLanguageContentForActiveSection();
+
+        } else {
+            console.warn(`[index.html - showSection] Sección con ID '${sectionId}' no encontrada. Redirigiendo a Inicio.`);
+            showSection('home'); // Volver a inicio si la sección no se encuentra
+            return;
+        }
+
+        // Actualizar el estilo de los enlaces de navegación: solo resaltar el enlace interno activo
+        document.querySelectorAll('nav a').forEach(link => {
+            const linkHref = link.getAttribute('href');
+            const linkSectionId = linkHref.startsWith('#') ? linkHref.substring(1) : null;
+
+            if (linkSectionId === sectionId) {
+                link.classList.add('font-semibold', 'text-white');
+                link.classList.remove('text-gray-300');
+            } else {
+                // Para todos los demás enlaces (incluyendo blog.html y enlaces internos inactivos)
+                link.classList.remove('font-semibold', 'text-white');
+                link.classList.add('text-gray-300');
+            }
+        });
+    }
+
+    function applyLang() {
+        console.log(`[index.html - applyLang] called. currentLang: ${currentLang}`);
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+            // Handle placeholders for input/textarea elements
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                const placeholderAttr = currentLang === 'en' ? el.dataset.enPlaceholder : el.dataset.esPlaceholder;
+                if (placeholderAttr) {
+                    el.placeholder = placeholderAttr;
+                } else {
+                    el.placeholder = currentLang === 'en' ? el.dataset.en : el.dataset.es;
+                }
+            }
+            // Handle innerHTML for labels/spans that contain links (like consent text)
+            else if (el.closest('label') && (el.dataset.es || el.dataset.en)) { // Check if it's a span inside a label with data-lang attributes
+                el.innerHTML = currentLang === 'en' ? el.dataset.en : el.dataset.es;
+            }
+            // Handle textContent for other elements
+            else {
+                el.textContent = currentLang === 'en' ? el.dataset.en : el.dataset.es;
+            }
+        });
+
+        document.getElementById('lang-toggle').textContent = currentLang === 'es' ? 'EN' : 'ES';
+
+        // Ocultar/mostrar enlaces del footer y checkboxes GDPR según el idioma
+        document.querySelectorAll('footer .lang-content, #contact .lang-content, #cookie-consent-banner .lang-content').forEach(div => {
+            if (div.dataset.lang === currentLang) {
+                div.style.display = 'block';
+            } else {
+                div.style.display = 'none';
+            }
+        });
+
+        // Actualizar href de los botones y enlaces con data-es-href/data-en-href
+        document.querySelectorAll('[data-es-href][data-en-href]').forEach(link => {
+            link.href = currentLang === 'es' ? link.dataset.esHref : link.dataset.enHref;
+        });
+
+        // Después de actualizar todos los textos, asegúrate de que el contenido de la sección activa sea visible
+        updateLanguageContentForActiveSection();
+    }
+
+    // Function to display a temporary message box for audio
+    function showAudioMessageBox(message, type = 'error', duration = 5000) {
+        const msgBox = document.getElementById('audio-message-box');
+        if (!msgBox) {
+            console.error("Audio message box element not found!");
+            return;
+        }
+        msgBox.textContent = message;
+        msgBox.style.display = 'block';
+        if (type === 'error') {
+            msgBox.style.backgroundColor = 'rgba(220, 38, 38, 0.9)'; // Red
+        } else {
+            msgBox.style.backgroundColor = 'rgba(29, 78, 216, 0.9)'; // Blue for other messages
+        }
+
+        setTimeout(() => {
+            msgBox.style.display = 'none';
+        }, duration);
+    }
+
+    // Function to display a temporary message box for forms
+    function showFormMessageBox(message, type = 'success', duration = 5000) {
+        const msgBox = document.getElementById('form-message-box');
+        if (!msgBox) {
+            console.error("Form message box element not found!");
+            return;
+        }
+        msgBox.textContent = message;
+        if (type === 'success') {
+            msgBox.style.backgroundColor = 'rgba(16, 185, 129, 0.9)'; // Tailwind green-500
+        } else if (type === 'error') {
+            msgBox.style.backgroundColor = 'rgba(220, 38, 38, 0.9)'; // Tailwind red-500
+        }
+        msgBox.style.display = 'block';
+        setTimeout(() => {
+            msgBox.style.display = 'none';
+        }, duration);
+    }
+
+
+    // Global variable to keep track of the currently playing audio
+    let currentPlayingAudio = null;
+
+    // Function to handle menu responsiveness (desktop vs. mobile)
+    function handleMenuResponsiveness() {
+        const navMenu = document.querySelector('header nav');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        // Determine if currently in mobile view based on Tailwind's 'md' breakpoint (768px)
+        const isMobileView = window.innerWidth < 768;
+
+        if (!navMenu || !mobileMenuButton) {
+            console.warn("[handleMenuResponsiveness] Navigation elements not found. Cannot apply responsiveness.");
+            return;
+        }
+
+        if (isMobileView) {
+            // On mobile, ensure the mobile button is visible
+            mobileMenuButton.style.display = 'block';
+
+            // If the nav menu is currently visible (i.e., 'hidden' class is NOT present),
+            // ensure it has the mobile-specific layout classes.
+            if (!navMenu.classList.contains('hidden')) {
+                navMenu.classList.add('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+                // Remove desktop specific flex classes if they were somehow applied
+                navMenu.classList.remove('flex', 'flex-grow', 'justify-center', 'space-x-10');
+            } else {
+                // If it's hidden, ensure it doesn't have mobile layout classes
+                // (they will be added when the mobile menu button is clicked to show it)
+                navMenu.classList.remove('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+            }
+        } else {
+            // On desktop, ensure mobile button is hidden
+            mobileMenuButton.style.display = 'none';
+
+            // Ensure nav is always visible and horizontal on desktop
+            navMenu.classList.remove('hidden', 'flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+            // Add desktop flex classes if they are missing
+            navMenu.classList.add('flex', 'flex-grow', 'justify-center', 'space-x-10');
+        }
+        console.log(`[handleMenuResponsiveness] isMobileView: ${isMobileView}, navMenu classes: ${navMenu.classList}`);
+    }
+
+    // Function to set up contact form submission
+    function setupContactForm(formId, lang) {
+        const form = document.getElementById(formId);
+        if (!form) {
+            console.error(`Form with ID ${formId} not found.`);
+            return;
+        }
+
+        const mensajeConfirmacion = document.getElementById(`mensaje-confirmacion-${lang}`);
+        const fechaInput = form.querySelector('[name="fecha"]'); // Select by name, safer
+
+        // Set initial date
+        if (fechaInput) {
+            fechaInput.value = new Date().toLocaleString("es-ES");
+        }
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            
+            // Update date just before submission to ensure it's current
+            if (fechaInput) {
+                fechaInput.value = new Date().toLocaleString("es-ES");
+            }
+
+            const data = {
+                nombre: form.nombre.value,
+                apellido: form.apellido.value,
+                email: form.email.value,
+                mensaje: form.mensaje.value,
+                consentimiento: form.consentimiento.checked ? "si" : "no",
+                idioma: lang, // Use the passed lang parameter
+                fecha: fechaInput ? fechaInput.value : '' // Ensure fecha is included if found
+            };
+
+            console.log(`[Contact Form ${lang.toUpperCase()}] Attempting to send data:`, data);
+
+            try {
+                const response = await fetch("https://n8n.ailabmind.com/webhook/form-contacto", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    form.reset();
+                    if (mensajeConfirmacion) {
+                        mensajeConfirmacion.classList.remove("hidden");
+                        setTimeout(() => mensajeConfirmacion.classList.add("hidden"), 4000);
+                    }
+                    showFormMessageBox(lang === 'es' ? '¡Mensaje enviado con éxito!' : 'Message sent successfully!', 'success');
+                } else {
+                    const errorText = await response.text(); // Get response text for more details
+                    console.error(`[Contact Form ${lang.toUpperCase()}] Failed to send data. Status: ${response.status}, Response: ${errorText}`);
+                    showFormMessageBox(lang === 'es' ? 'Hubo un error al enviar el formulario.' : 'There was an error sending the form.', 'error');
+                }
+            } catch (err) {
+                console.error(`[Contact Form ${lang.toUpperCase()}] Network error:`, err);
+                showFormMessageBox(lang === 'es' ? 'Error de conexión.' : 'Connection error.', 'error');
+            }
+        });
+    }
+
+    // Function to set up newsletter form submission
+    function setupNewsletterForm(formId, lang) {
+        const form = document.getElementById(formId);
+        if (!form) {
+            console.error(`Form with ID ${formId} not found.`);
+            return;
+        }
+
+        const mensajeConfirmacion = document.getElementById(`newsletter-confirmacion-${lang}`);
+        const fechaInput = form.querySelector('[name="fecha"]');
+
+        if (fechaInput) {
+            fechaInput.value = new Date().toISOString();
+        }
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            if (fechaInput) {
+                fechaInput.value = new Date().toISOString();
+            }
+
+            const data = {
+                email: form.email.value,
+                consentimiento: form.consentimiento.checked ? "si" : "no",
+                idioma: lang,
+                fecha: fechaInput ? fechaInput.value : ''
+            };
+
+            console.log(`[Newsletter Form ${lang.toUpperCase()}] Attempting to send data:`, data);
+
+            try {
+                const response = await fetch("https://n8n.ailabmind.com/webhook/form-newsletter", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    form.reset();
+                    if (mensajeConfirmacion) {
+                        mensajeConfirmacion.classList.remove("hidden");
+                        setTimeout(() => mensajeConfirmacion.classList.add("hidden"), 4000);
+                    }
+                    showFormMessageBox(lang === 'es' ? '¡Gracias por suscribirte!' : 'Thanks for subscribing!', 'success');
+                } else {
+                    const errorText = await response.text();
+                    console.error(`[Newsletter Form ${lang.toUpperCase()}] Failed to send data. Status: ${response.status}, Response: ${errorText}`);
+                    showFormMessageBox(lang === 'es' ? 'Hubo un error al enviar el formulario.' : 'Error submitting the form.', 'error');
+                }
+            } catch (err) {
+                console.error(`[Newsletter Form ${lang.toUpperCase()}] Network error:`, err);
+                showFormMessageBox(lang === 'es' ? 'Error de conexión.' : 'Could not connect to the server.', 'error');
+            }
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.clear(); // Limpia la consola al cargar el DOM
+        console.log('[index.html] DOMContentLoaded event fired. Script execution started.');
+
+        // Add the message box element for audio to the body (if not already there)
+        if (!document.getElementById('audio-message-box')) {
+            const audioMessageBox = document.createElement('div');
+            audioMessageBox.id = 'audio-message-box';
+            document.body.appendChild(audioMessageBox);
+        }
+
+        // Add the message box element for form feedback to the body (if not already there)
+        if (!document.getElementById('form-message-box')) {
+            const formMessageBox = document.createElement('div');
+            formMessageBox.id = 'form-message-box';
+            formMessageBox.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 bg-green-600 text-white p-4 rounded-lg shadow-lg z-50';
+            formMessageBox.style.display = 'none'; // Hidden by default
+            document.body.appendChild(formMessageBox);
+        }
+
+
+        // Manejo de la navegación por hash al cargar la página
+        const initialHash = window.location.hash.substring(1);
+        if (initialHash && document.getElementById(initialHash)) {
+            showSection(initialHash);
+        } else {
+            showSection('home'); // Mostrar la sección de inicio por defecto
+        }
+
+        // Event listeners para los enlaces de navegación de la cabecera
+        document.querySelectorAll('header nav a').forEach(link => {
+            link.addEventListener('click', (event) => {
+                const href = link.getAttribute('href');
+                // Comprobar si es un enlace interno (ej. #home, #focus)
+                if (href.startsWith('#')) {
+                    event.preventDefault(); // Prevenir la navegación predeterminada por hash
+                    const sectionId = href.substring(1);
+                    console.log(`[index.html - nav click] Link clicked: ${href}, Navigating to section: ${sectionId}`); // Debugging
+                    showSection(sectionId);
+                    history.pushState(null, '', href); // Actualizar la URL sin recargar
+
+                    // Cerrar el menú móvil después de hacer clic en un enlace (solo si el menú móvil está activo)
+                    const navMenu = document.querySelector('header nav');
+                    const mobileMenuButton = document.getElementById('mobile-menu-button');
+                    if (window.getComputedStyle(mobileMenuButton).display !== 'none') {
+                        if (!navMenu.classList.contains('hidden')) { // Comprobar si está visible (abierto)
+                            navMenu.classList.add('hidden');
+                            // Also remove mobile-specific layout classes when closing
+                            navMenu.classList.remove('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+                        }
+                    }
+                }
+                // Si no es un enlace hash (ej. "blog.html"), dejar que el navegador lo maneje normalmente.
+            });
+        });
+
+        // Event listeners para los botones "Explora Nuestras Soluciones"
+        document.querySelectorAll('a.btn-outline.glow-cyan').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const href = button.getAttribute('href');
+                if (href.startsWith('#')) {
+                    event.preventDefault();
+                    const sectionId = href.substring(1);
+                    console.log(`[index.html - btn-outline click] Button clicked: ${button.textContent}, Navigating to section: ${sectionId}`); // Debugging
+                    showSection(sectionId);
+                    history.pushState(null, '', href);
+                }
+            });
+        });
+
+        // NUEVO: Event listeners para los enlaces rápidos del footer
+        document.querySelectorAll('footer ul.space-y-2 a').forEach(link => {
+            link.addEventListener('click', (event) => {
+                const href = link.getAttribute('href');
+                // Solo manejar enlaces internos (con #) para showSection
+                if (href.startsWith('#')) {
+                    event.preventDefault(); // Prevenir la navegación predeterminada por hash
+                    const sectionId = href.substring(1);
+                    console.log(`[index.html - footer quick link click] Link clicked: ${href}, Navigating to section: ${sectionId}`);
+                    showSection(sectionId);
+                    history.pushState(null, '', href); // Actualizar la URL sin recargar
+                }
+                // Si no es un enlace hash (ej. "blog.html"), dejar que el navegador lo maneje normalmente.
+            });
+        });
+
+
+        // Event listener para el botón de idioma
+        const langBtn = document.getElementById('lang-toggle');
+        langBtn.addEventListener('click', () => {
+            currentLang = currentLang === 'es' ? 'en' : 'es';
+            localStorage.setItem('currentLang', currentLang); // Guardar en local storage
+            applyLang();
+        });
+
+        // Manejo del menú móvil
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        mobileMenuButton.addEventListener('click', () => {
+            const navMenu = document.querySelector('header nav');
+            // Only toggle if it's actually in mobile view (mobileMenuButton is visible)
+            if (window.getComputedStyle(mobileMenuButton).display !== 'none') {
+                navMenu.classList.toggle('hidden'); // Toggle visibility
+
+                // When showing, add mobile layout classes. When hiding, remove them.
+                if (!navMenu.classList.contains('hidden')) { // If it's now visible
+                    navMenu.classList.add('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+                    navMenu.classList.remove('flex', 'flex-grow', 'justify-center', 'space-x-10'); // Ensure desktop classes are removed
+                } else { // If it's now hidden
+                    navMenu.classList.remove('flex-col', 'space-y-4', 'absolute', 'top-full', 'left-0', 'right-0', 'bg-black', 'bg-opacity-90', 'py-4', 'px-6', 'z-20', 'items-center');
+                    // We don't re-add desktop classes here, as handleMenuResponsiveness or md:flex will do it.
+                }
+            }
+        });
+
+        // Añadir clase para la animación inicial del brillo
+        document.querySelectorAll('.agent-image-upload-container').forEach(wrapper => {
+            wrapper.classList.add('initial-shine');
+            // Eliminar la clase después de que la animación inicial termine
+            wrapper.addEventListener('animationend', (event) => {
+                if (event.animationName === 'borderBeam') {
+                    wrapper.classList.remove('initial-shine');
+                }
+            });
+        });
+
+        // Lógica para la subida de imagen del logo (solo previsualización)
+        const logoUploadInput = document.getElementById('logo-upload-input');
+        const currentLogo = document.getElementById('current-logo');
+
+        if (logoUploadInput && currentLogo) {
+            logoUploadInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        currentLogo.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Lógica para la subida de imagen de los agentes (solo previsualización)
+        function setupAgentImageUpload(inputId, imgId) {
+            const uploadInput = document.getElementById(inputId);
+            const agentImage = document.getElementById(imgId);
+
+            if (uploadInput && agentImage) {
+                uploadInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            agentImage.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                }
+            });
+        }
+        }
+
+        // Configurar la carga de imagen para Mike (ES y EN)
+        setupAgentImageUpload('mike-image-upload-input', 'mike-image');
+        setupAgentImageUpload('mike-image-upload-input-en', 'mike-image-en');
+
+        // Configurar la carga de imagen para Iris (ES y EN)
+        setupAgentImageUpload('iris-image-upload-input', 'iris-image');
+        setupAgentImageUpload('iris-image-upload-input-en', 'iris-image-en');
+
+
+        // Setup the new contact forms
+        setupContactForm('form-contacto-es', 'es');
+        setupContactForm('form-contacto-en', 'en');
+
+        // Setup the new newsletter forms
+        setupNewsletterForm('form-newsletter-es', 'es');
+        setupNewsletterForm('form-newsletter-en', 'en');
+
+        // Cookie Consent Logic
+        const cookieConsentBanner = document.getElementById('cookie-consent-banner');
+        const acceptCookiesEsBtn = document.getElementById('accept-cookies-es');
+        const acceptCookiesEnBtn = document.getElementById('accept-cookies-en');
+
+        // Check if cookie consent has been given
+        const hasAcceptedCookies = localStorage.getItem('cookieConsent') === 'accepted';
+
+        if (!hasAcceptedCookies) {
+            // Show the banner after a short delay to allow page to load
+            setTimeout(() => {
+                cookieConsentBanner.classList.add('show');
+            }, 1000); // 1 second delay
+        } else {
+            cookieConsentBanner.style.display = 'none'; // Keep it hidden if already accepted
+        }
+
+        // Event listener for accepting cookies (Spanish)
+        if (acceptCookiesEsBtn) {
+            acceptCookiesEsBtn.addEventListener('click', () => {
+                localStorage.setItem('cookieConsent', 'accepted');
+                cookieConsentBanner.classList.remove('show');
+                setTimeout(() => {
+                    cookieConsentBanner.style.display = 'none';
+                }, 500); // Hide after animation
+            });
+        }
+
+        // Event listener for accepting cookies (English)
+        if (acceptCookiesEnBtn) {
+            acceptCookiesEnBtn.addEventListener('click', () => {
+                localStorage.setItem('cookieConsent', 'accepted');
+                cookieConsentBanner.classList.remove('show');
+                setTimeout(() => {
+                    cookieConsentBanner.style.display = 'none';
+                }, 500); // Hide after animation
+            });
+        }
+
+
+        // Inicialización
+        applyLang(); // Aplicar idioma al cargar
+        handleMenuResponsiveness(); // Initial call to set correct menu state
+
+        // Event listener for window resize
+        window.addEventListener('resize', handleMenuResponsiveness);
+
+        // Debugging: Check if audio elements are found on DOMContentLoaded
+        console.log(`[DOMContentLoaded Check] mike-audio-es found: ${!!document.getElementById('mike-audio-es')}`);
+        console.log(`[DOMContentLoaded Check] mike-audio-en found: ${!!document.getElementById('mike-audio-en')}`);
+        console.log(`[DOMContentLoaded Check] iris-audio-es found: ${!!document.getElementById('iris-audio-es')}`);
+        console.log(`[DOMContentLoaded Check] iris-audio-en found: ${!!document.getElementById('iris-audio-en')}`);
+
+        if (!document.getElementById('mike-audio-es')) console.error("Error: mike-audio-es not found!");
+        if (!document.getElementById('mike-audio-en')) console.error("Error: mike-audio-en not found!");
+        if (!document.getElementById('iris-audio-es')) console.error("Error: iris-audio-es not found!");
+        if (!document.getElementById('iris-audio-en')) console.error("Error: iris-audio-en not found!");
+    });
+
+    // Función para reproducir audio (si tienes archivos de audio para Mike e Iris)
+    function playAudio(agentId, lang) {
+        const audioId = `${agentId}-audio-${lang}`;
+        const audio = document.getElementById(audioId);
+        console.log(`[playAudio] Attempting to play audio for: ${audioId}. Current language: ${lang}`);
+
+        if (audio) {
+            console.log(`[playAudio] Audio element found:`, audio);
+
+            // If there's an audio currently playing and it's not the one we just clicked, pause it.
+            if (currentPlayingAudio && currentPlayingAudio !== audio) {
+                console.log(`[playAudio] Pausing previously playing audio: ${currentPlayingAudio.id}`);
+                currentPlayingAudio.pause();
+                currentPlayingAudio.currentTime = 0; // Rewind to start
+            }
+
+            // Check if the clicked audio is already playing or paused
+            if (audio.paused) {
+                audio.play().then(() => {
+                    console.log(`[playAudio] Audio played successfully for: ${audioId}`);
+                    showAudioMessageBox(`Reproduciendo audio de ${agentId}...`, 'info', 2000);
+                    currentPlayingAudio = audio; // Set this as the currently playing audio
+                }).catch(error => {
+                    console.error(`[playAudio] Error playing audio for ${audioId}:`, error);
+                    let errorMessage = `No se pudo reproducir el audio de ${agentId}.`;
+                    if (error.name === "NotAllowedError") {
+                        errorMessage += " El navegador bloqueó la reproducción automática. Intenta interactuar más con la página o ajusta la configuración de tu navegador.";
+                    } else if (error.name === "AbortError") {
+                        errorMessage += " La reproducción fue abortada (posiblemente por otra acción o el navegador).";
+                    } else if (error.name === "NetworkError") {
+                        errorMessage += " Error de red al cargar el archivo de audio. Verifica la ruta y si el archivo existe.";
+                    }
+                    showAudioMessageBox(errorMessage, 'error');
+                });
+            } else {
+                // If audio is already playing, pause it
+                console.log(`[playAudio] Pausing audio for: ${audioId} (clicked again)`);
+                audio.pause();
+                audio.currentTime = 0; // Rewind to start
+                currentPlayingAudio = null; // No audio is currently playing
+                showAudioMessageBox(`Audio de ${agentId} pausado.`, 'info', 1500);
+            }
+
+            // Add event listener for when audio ends naturally
+            audio.onended = () => {
+                console.log(`[Audio Ended] Audio ${audioId} finished playing.`);
+                if (currentPlayingAudio === audio) {
+                    currentPlayingAudio = null; // Clear if this was the one playing
+                }
+            };
+
+            // Add event listeners for audio loading errors
+            audio.onerror = (e) => {
+                console.error(`[Audio Error] Failed to load audio for ${audioId}:`, e);
+                showAudioMessageBox(`Error al cargar el audio para ${agentId}. Verifica la ruta del archivo.`, 'error');
+                if (currentPlayingAudio === audio) {
+                    currentPlayingAudio = null;
+                }
+            };
+            audio.oncanplaythrough = () => {
+                console.log(`[Audio Ready] Audio ${audioId} is ready to play.`);
+            };
+
+        } else {
+            console.warn(`[playAudio] Audio element NOT found for: ${audioId}. Check if ID is correct and element exists.`);
+            showAudioMessageBox(`Error: Elemento de audio con ID "${audioId}" no encontrado.`, 'error');
+        }
+    }
+
+    // Attach event listeners to buttons, using querySelectorAll for all relevant buttons
+    document.querySelectorAll('button[id^="mike-btn"], button[id^="iris-btn"]').forEach(button => {
+        button.addEventListener('click', () => {
+            const agentId = button.id.startsWith('mike') ? 'mike' : 'iris';
+            console.log(`[Event Listener] ${agentId} button clicked! Button ID: ${button.id}`);
+            playAudio(agentId, currentLang);
+        });
+    });
+
+</script>
+
+<script>
+  const blogPosts = [
+    {
+      titleEs: "¿Por qué necesitas un agente de voz?",
+      descriptionEs: "Descubre cómo una voz automatizada puede cambiar tu forma de atender clientes.",
+      imagePath: "post1.png",
+      url: "#"
+    },
+    {
+      titleEs: "Cómo escalar tus ventas con IA",
+      descriptionEs: "Estrategias inteligentes para aumentar tus ingresos sin aumentar tu equipo.",
+      imagePath: "post2.png",
+      url: "#"
+    },
+    {
+      titleEs: "Automatiza tareas repetitivas con IA",
+      descriptionEs: "Ahorra tiempo y reduce errores automatizando lo que haces todos los días.",
+      imagePath: "post3.png",
+      url: "#"
+    }
+  ];
+</script>
+
+</body>
+</html>
